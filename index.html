@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Architecture Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-sitemap"></i>
+                    <h1>Enterprise Architecture Assistant</h1>
+                </div>
+                <div class="header-controls">
+                    <button class="btn-secondary" onclick="openSettings()">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
+                    <div class="status-indicator" id="status-indicator">
+                        <i class="fas fa-circle"></i>
+                        <span id="status-text">System Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <h2>AI-Powered Enterprise Architecture Intelligence</h2>
+                <p>Generate strategic technology analysis, vendor evaluations, and market intelligence using advanced AI and real-time web research.</p>
+            </section>
+
+            <!-- Agent Cards Grid -->
+            <section class="agents-grid">
+                <div class="agent-card priority-1" onclick="openAgent('technology-research')">
+                    <div class="agent-header">
+                        <i class="fas fa-search"></i>
+                        <div class="priority-badge">Priority 1</div>
+                    </div>
+                    <h3>Technology Research Agent</h3>
+                    <p>Comprehensive technology analysis with market intelligence, vendor evaluation, and strategic positioning.</p>
+                    <ul class="features">
+                        <li>Real-time market research</li>
+                        <li>Vendor landscape analysis</li>
+                        <li>Hype cycle positioning</li>
+                        <li>Strategic whitepapers</li>
+                    </ul>
+                    <div class="agent-status">
+                        <span class="status-ready">Ready</span>
+                    </div>
+                </div>
+
+                <div class="agent-card priority-2" onclick="openAgent('strategic-analysis')">
+                    <div class="agent-header">
+                        <i class="fas fa-chess"></i>
+                        <div class="priority-badge">Priority 2</div>
+                    </div>
+                    <h3>Strategic Analysis Agent</h3>
+                    <p>Business-technology alignment analysis and strategic planning recommendations.</p>
+                    <ul class="features">
+                        <li>Business case development</li>
+                        <li>ROI analysis frameworks</li>
+                        <li>Risk assessment matrices</li>
+                        <li>Implementation roadmaps</li>
+                    </ul>
+                    <div class="agent-status">
+                        <span class="status-coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+
+                <div class="agent-card priority-3" onclick="openAgent('supplier-evaluation')">
+                    <div class="agent-header">
+                        <i class="fas fa-balance-scale"></i>
+                        <div class="priority-badge">Priority 3</div>
+                    </div>
+                    <h3>Supplier Evaluation Agent</h3>
+                    <p>4 P's framework evaluation: People, Process, Platform, Price analysis for vendor selection.</p>
+                    <ul class="features">
+                        <li>4 P's evaluation framework</li>
+                        <li>TCO analysis</li>
+                        <li>Risk assessment</li>
+                        <li>Comparative scorecards</li>
+                    </ul>
+                    <div class="agent-status">
+                        <span class="status-coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+
+                <div class="agent-card priority-4" onclick="openAgent('roadmap-planning')">
+                    <div class="agent-header">
+                        <i class="fas fa-road"></i>
+                        <div class="priority-badge">Priority 4</div>
+                    </div>
+                    <h3>Roadmap Planning Agent</h3>
+                    <p>Multi-year technology roadmap development with dependency mapping and milestone planning.</p>
+                    <ul class="features">
+                        <li>Dependency analysis</li>
+                        <li>Timeline optimization</li>
+                        <li>Resource planning</li>
+                        <li>Milestone tracking</li>
+                    </ul>
+                    <div class="agent-status">
+                        <span class="status-coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+
+                <div class="agent-card priority-5" onclick="openAgent('adr-agent')">
+                    <div class="agent-header">
+                        <i class="fas fa-file-contract"></i>
+                        <div class="priority-badge">Priority 5</div>
+                    </div>
+                    <h3>ADR Agent</h3>
+                    <p>Architecture Decision Record generation and documentation management.</p>
+                    <ul class="features">
+                        <li>Decision documentation</li>
+                        <li>Context analysis</li>
+                        <li>Consequence evaluation</li>
+                        <li>Template generation</li>
+                    </ul>
+                    <div class="agent-status">
+                        <span class="status-coming-soon">Coming Soon</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="recent-activity">
+                <h3><i class="fas fa-history"></i> Recent Analysis</h3>
+                <div class="activity-list" id="activity-list">
+                    <div class="activity-item">
+                        <i class="fas fa-info-circle"></i>
+                        <span>No recent analysis. Start with the Technology Research Agent to generate your first strategic report.</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Settings Sidebar -->
+    <div class="sidebar" id="settings-sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-cog"></i> Settings</h3>
+            <button class="btn-close" onclick="closeSettings()">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="setting-group">
+                <label for="claude-api-key">Claude API Key:</label>
+                <input type="password" id="claude-api-key" placeholder="sk-ant-api03-...">
+                <small>Your Anthropic Claude API key for AI analysis</small>
+            </div>
+            
+            <div class="setting-group">
+                <label for="search-provider">Search Provider:</label>
+                <select id="search-provider">
+                    <option value="bing">Bing Web Search</option>
+                    <option value="serpapi">SerpApi (Google)</option>
+                    <option value="brave">Brave Search</option>
+                </select>
+                <small>Web search engine for market intelligence</small>
+            </div>
+
+            <div class="setting-group">
+                <label for="organization-name">Organization Name:</label>
+                <input type="text" id="organization-name" placeholder="Your Company Name">
+                <small>Used in generated reports and analysis</small>
+            </div>
+
+            <div class="setting-group">
+                <label for="industry-sector">Industry Sector:</label>
+                <select id="industry-sector">
+                    <option value="">Select Industry</option>
+                    <option value="financial-services">Financial Services</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="technology">Technology</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="retail">Retail</option>
+                    <option value="government">Government</option>
+                    <option value="education">Education</option>
+                    <option value="other">Other</option>
+                </select>
+                <small>Helps tailor analysis to your industry context</small>
+            </div>
+
+            <div class="setting-actions">
+                <button class="btn-primary settings-btn" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+                <button class="btn-secondary settings-btn" onclick="testConnection()">
+                    <i class="fas fa-wifi"></i> Test Connection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Modal -->
+    <div class="modal" id="agent-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Agent Interface</h3>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Agent interfaces will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/agents/technology-research.js"></script>
+    <script src="js/agents/research-interface.js"></script>
+</body>
+</html>

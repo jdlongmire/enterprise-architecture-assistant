@@ -1,0 +1,32 @@
+{
+  "name": "enterprise-architecture-assistant",
+  "version": "1.0.0",
+  "description": "Enterprise Architecture AI Assistant with web search integration",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static site - no build required'",
+    "test": "echo 'No tests specified'"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "netlify-cli": "^15.0.0"
+  },
+  "keywords": [
+    "enterprise-architecture",
+    "ai-assistant",
+    "technology-research",
+    "strategic-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jdlongmire/enterprise-architecture-assistant.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
