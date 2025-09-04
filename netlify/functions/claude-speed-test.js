@@ -80,11 +80,11 @@ exports.handler = async (event, context) => {
             underNetlifyLimit: totalTime < 10000
           },
           comparison: {
-            geminiSpeed: '141ms (discovery), 225ms (total)',
-            claudeSpeed: `${apiCallTime}ms (API), ${totalTime}ms (total)`,
-            verdict: totalTime < 1000 ? 'MUCH_FASTER_THAN_EXPECTED' : 
-                     totalTime < 5000 ? 'FAST_ENOUGH' : 
-                     totalTime < 10000 ? 'SLOW_BUT_WORKABLE' : 'TOO_SLOW_FOR_NETLIFY'
+            simplePromptSpeed: '1913ms (17 tokens)',
+            comprehensivePromptSpeed: `${apiCallTime}ms (API), ${totalTime}ms (total)`,
+            verdict: totalTime < 1913 ? 'COMPREHENSIVE_FASTER_THAN_EXPECTED' : 
+                     totalTime < 5000 ? 'COMPREHENSIVE_REASONABLE' : 
+                     totalTime < 10000 ? 'COMPREHENSIVE_SLOW_BUT_WORKABLE' : 'COMPREHENSIVE_TOO_SLOW_FOR_NETLIFY'
           }
         })
       };
