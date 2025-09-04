@@ -55,7 +55,7 @@ exports.handler = async (event, context) => {
 Keep response under 250 words. Focus on quantifiable data and business insights.`;
 
     const chatgptRequest = {
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: testPrompt }],
       max_tokens: 350,
       temperature: 0.3
