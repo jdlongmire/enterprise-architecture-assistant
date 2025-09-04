@@ -38,81 +38,141 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Simple test prompt for EA analysis
-    const testPrompt = `Provide a brief 2-paragraph analysis of Zero Trust Security for enterprise architecture. Include market adoption and key benefits.`;
-
-    // Gemini Pro API endpoint
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`;
+    console.log('Discovering available Gemini models...');
     
-    const requestBody = {
-      contents: [{
-        parts: [{
-          text: testPrompt
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.3,
-        topK: 1,
-        topP: 1,
-        maxOutputTokens: 1000,
-      }
-    };
-
-    console.log('Calling Gemini API...');
+    // Step 1: List available models
+    const listModelsUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`;
     
-    const response = await fetch(apiUrl, {
-      method: 'POST',
+    const modelsResponse = await fetch(listModelsUrl, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
+      }
     });
 
-    const responseTime = Date.now() - startTime;
-    
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Gemini API error:', response.status, errorData);
-      
+    if (!modelsResponse.ok) {
+      const errorData = await modelsResponse.text();
       return {
-        statusCode: response.status,
+        statusCode: modelsResponse.status,
         headers,
         body: JSON.stringify({
-          error: `Gemini API error: ${response.status}`,
-          details: errorData,
-          responseTime: responseTime
+          error: `Failed to list models: ${modelsResponse.status}`,
+          details: errorData
         })
       };
     }
 
-    const data = await response.json();
+    const modelsData = await modelsResponse.json();
+    const discoveryTime = Date.now() - startTime;
     
-    // Extract the generated text
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
+    // Filter models that support generateContent
+    const availableModels = modelsData.models || [];
+    const generateContentModels = availableModels.filter(model => 
+      model.supportedGenerationMethods && 
+      model.supportedGenerationMethods.includes('generateContent')
+    );
+
+    // Pick the first available model for speed testing
+    const testModel = generateContentModels.length > 0 ? generateContentModels[0] : null;
+    
+    let speedTestResult = null;
+    
+    if (testModel) {
+      console.log(`Testing speed with model: ${testModel.name}`);
+      
+      // Step 2: Test speed with available model
+      const testPrompt = `Provide a brief 2-paragraph analysis of Zero Trust Security for enterprise architecture. Include market adoption and key benefits.`;
+      
+      const generateUrl = `https://generativelanguage.googleapis.com/v1beta/${testModel.name}:generateContent?key=${geminiApiKey}`;
+      
+      const requestBody = {
+        contents: [{
+          parts: [{
+            text: testPrompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.3,
+          topK: 1,
+          topP: 1,
+          maxOutputTokens: 1000,
+        }
+      };
+
+      const speedTestStart = Date.now();
+      
+      const generateResponse = await fetch(generateUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const generateTime = Date.now() - speedTestStart;
+      
+      if (generateResponse.ok) {
+        const generateData = await generateResponse.json();
+        const generatedText = generateData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
+        
+        speedTestResult = {
+          success: true,
+          responseTime: generateTime,
+          speedAnalysis: {
+            milliseconds: generateTime,
+            seconds: (generateTime / 1000).toFixed(2),
+            underNetlifyLimit: generateTime < 10000,
+            status: generateTime < 5000 ? 'FAST' : generateTime < 10000 ? 'ACCEPTABLE' : 'TOO_SLOW'
+          },
+          modelUsed: testModel.name,
+          generatedText: generatedText.substring(0, 500) + (generatedText.length > 500 ? '...' : ''),
+          comparison: {
+            claudeTypicalTime: '15-30 seconds',
+            geminiActualTime: `${(generateTime / 1000).toFixed(2)} seconds`,
+            improvement: generateTime < 10000 ? 'SIGNIFICANT_IMPROVEMENT' : 'STILL_TOO_SLOW'
+          }
+        };
+      } else {
+        const errorData = await generateResponse.text();
+        speedTestResult = {
+          success: false,
+          error: `Speed test failed: ${generateResponse.status}`,
+          details: errorData,
+          modelTested: testModel.name
+        };
+      }
+    }
+
+    const totalTime = Date.now() - startTime;
     
     const result = {
-      success: true,
-      responseTime: responseTime,
-      speedAnalysis: {
-        milliseconds: responseTime,
-        seconds: (responseTime / 1000).toFixed(2),
-        underNetlifyLimit: responseTime < 10000,
-        status: responseTime < 5000 ? 'FAST' : responseTime < 10000 ? 'ACCEPTABLE' : 'TOO_SLOW'
+      modelDiscovery: {
+        success: true,
+        discoveryTime: discoveryTime,
+        totalModelsFound: availableModels.length,
+        generateContentModels: generateContentModels.length,
+        models: availableModels.map(model => ({
+          name: model.name,
+          displayName: model.displayName,
+          description: model.description,
+          inputTokenLimit: model.inputTokenLimit,
+          outputTokenLimit: model.outputTokenLimit,
+          supportedMethods: model.supportedGenerationMethods || []
+        }))
       },
-      geminiResponse: {
-        text: generatedText,
-        model: 'gemini-pro',
-        prompt: testPrompt
+      speedTest: speedTestResult,
+      summary: {
+        recommendedModel: testModel ? testModel.name : 'No suitable model found',
+        readyForProduction: speedTestResult?.success && speedTestResult?.speedAnalysis?.underNetlifyLimit,
+        nextSteps: speedTestResult?.success ? 
+          'Gemini API is working and fast enough - ready to replace Claude' : 
+          'Need to troubleshoot model access or API permissions'
       },
-      comparison: {
-        claudeTypicalTime: '15-30 seconds',
-        geminiActualTime: `${(responseTime / 1000).toFixed(2)} seconds`,
-        improvement: responseTime < 10000 ? 'SIGNIFICANT_IMPROVEMENT' : 'STILL_TOO_SLOW'
-      },
+      totalTime: totalTime,
       timestamp: new Date().toISOString()
     };
 
-    console.log(`Gemini API response time: ${responseTime}ms`);
+    console.log(`Model discovery and speed test completed in ${totalTime}ms`);
     
     return {
       statusCode: 200,
@@ -121,15 +181,15 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    const responseTime = Date.now() - (context.startTime || Date.now());
+    const responseTime = Date.now() - startTime;
     
-    console.error('Gemini speed test error:', error);
+    console.error('Gemini discovery test error:', error);
     
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
-        error: 'Speed test failed: ' + error.message,
+        error: 'Discovery test failed: ' + error.message,
         responseTime: responseTime,
         details: error.stack
       })
