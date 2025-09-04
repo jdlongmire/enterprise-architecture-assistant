@@ -39,14 +39,30 @@ exports.handler = async (event, context) => {
 
     console.log('Testing simplified Claude prompt for viable EA analysis...');
     
-    // Simplified prompt - basic EA analysis
-    const testPrompt = `Analyze Zero Trust Security for enterprise architecture. Provide:
+// Replace the simplified prompt with this moderately complex version:
 
-1. Key business benefits (2-3 points)
-2. Main implementation challenges (2-3 points)  
-3. One strategic recommendation for adoption
+const testPrompt = `You are an enterprise architect analyzing Zero Trust Security. Provide a structured analysis:
 
-Keep response under 200 words.`;
+**BUSINESS CASE**
+- 3 key business drivers for adoption
+- ROI considerations and typical payback period
+- Risk mitigation value
+
+**IMPLEMENTATION APPROACH**
+- Recommended 3-phase rollout strategy
+- Critical success factors
+- Common pitfalls to avoid
+
+**VENDOR LANDSCAPE**
+- 3 leading vendors and their strengths
+- Key evaluation criteria for selection
+
+**STRATEGIC RECOMMENDATION**
+- Should we proceed? (Yes/No with rationale)
+- Timeline and budget considerations
+- Next steps for evaluation
+
+Limit response to 400 words. Focus on actionable enterprise insights.`;
     
     const claudeRequest = {
       model: "claude-sonnet-4-20250514",
