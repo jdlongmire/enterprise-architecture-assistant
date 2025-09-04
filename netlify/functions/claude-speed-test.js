@@ -37,47 +37,20 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('Testing comprehensive Claude API call (same prompt as research agent)...');
+    console.log('Testing simplified Claude prompt for viable EA analysis...');
     
-    // Test with the EXACT comprehensive prompt from research agent
-    const testPrompt = `You are a senior enterprise architect and technology analyst. Provide a comprehensive analysis of Zero Trust Security for enterprise architecture decision-making.
+    // Simplified prompt - basic EA analysis
+    const testPrompt = `Analyze Zero Trust Security for enterprise architecture. Provide:
 
-Please structure your response with these sections:
+1. Key business benefits (2-3 points)
+2. Main implementation challenges (2-3 points)  
+3. One strategic recommendation for adoption
 
-**MARKET ANALYSIS**
-- Current market size and growth projections
-- Key adoption drivers and business benefits
-- Industry sectors leading implementation
-- Market trends and future outlook
-
-**VENDOR LANDSCAPE**
-- Leading vendors and their positioning
-- Key differentiators and capabilities
-- Market share and competitive dynamics
-- Emerging players and innovations
-
-**TECHNOLOGY MATURITY ASSESSMENT**
-- Current position on technology adoption curve
-- Implementation readiness for enterprises
-- Time to mainstream adoption
-- Risk factors and challenges
-
-**STRATEGIC RECOMMENDATIONS**
-- Business case and ROI considerations
-- Implementation approach and timeline
-- Success factors and best practices
-- Decision framework for adoption
-
-**EXECUTIVE SUMMARY**
-- Key findings and strategic implications
-- Top 3 recommendations for enterprise leaders
-- Implementation priority and timeline
-
-Focus on actionable insights for C-level decision makers. Provide specific, data-driven recommendations suitable for enterprise architecture planning.`;
+Keep response under 200 words.`;
     
     const claudeRequest = {
       model: "claude-sonnet-4-20250514",
-      max_tokens: 3000,
+      max_tokens: 300,
       temperature: 0.3,
       messages: [{ role: "user", content: testPrompt }]
     };
@@ -113,11 +86,11 @@ Focus on actionable insights for C-level decision makers. Provide specific, data
             underNetlifyLimit: totalTime < 10000
           },
           comparison: {
-            simplePromptSpeed: '1913ms (17 tokens)',
-            comprehensivePromptSpeed: `${apiCallTime}ms (API), ${totalTime}ms (total)`,
-            verdict: totalTime < 1913 ? 'COMPREHENSIVE_FASTER_THAN_EXPECTED' : 
-                     totalTime < 5000 ? 'COMPREHENSIVE_REASONABLE' : 
-                     totalTime < 10000 ? 'COMPREHENSIVE_SLOW_BUT_WORKABLE' : 'COMPREHENSIVE_TOO_SLOW_FOR_NETLIFY'
+            simplestPrompt: '1616ms (17 tokens)',
+            simplifiedPrompt: `${apiCallTime}ms (API), ${totalTime}ms (total)`,
+            verdict: totalTime < 3000 ? 'SIMPLIFIED_VERY_FAST' : 
+                     totalTime < 5000 ? 'SIMPLIFIED_ACCEPTABLE' : 
+                     totalTime < 10000 ? 'SIMPLIFIED_SLOW_BUT_WORKABLE' : 'EVEN_SIMPLIFIED_TOO_SLOW'
           }
         })
       };
@@ -133,35 +106,36 @@ Focus on actionable insights for C-level decision makers. Provide specific, data
         totalFunctionTime: totalTime,
         underNetlifyLimit: totalTime < 10000,
         status: totalTime < 2000 ? 'VERY_FAST' : 
-                totalTime < 5000 ? 'FAST' : 
-                totalTime < 10000 ? 'ACCEPTABLE' : 'TOO_SLOW'
+                totalTime < 3000 ? 'FAST' : 
+                totalTime < 5000 ? 'ACCEPTABLE' : 
+                totalTime < 10000 ? 'SLOW_BUT_VIABLE' : 'TOO_SLOW'
       },
       claudeResponse: {
-        text: responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''),
-        fullTextLength: responseText.length,
+        text: responseText,
+        textLength: responseText.length,
         tokens: data.usage,
         model: 'claude-sonnet-4-20250514'
       },
       comparison: {
-        simplePromptSpeed: '1913ms (17 tokens)',
-        comprehensivePromptSpeed: `${apiCallTime}ms (API), ${totalTime}ms (total)`,
-        winner: apiCallTime < 1913 ? 'COMPREHENSIVE_FASTER' : 'SIMPLE_FASTER',
-        verdict: totalTime < 10000 ? 'COMPREHENSIVE_PROMPT_VIABLE_FOR_NETLIFY' : 'COMPREHENSIVE_PROMPT_TOO_SLOW_FOR_NETLIFY'
+        simplestPrompt: '1616ms (17 tokens)',
+        simplifiedEAPrompt: `${apiCallTime}ms (${data.usage.input_tokens} tokens)`,
+        comprehensivePrompt: 'Timed out (hundreds of tokens)',
+        winner: 'SIMPLIFIED_PROMPT',
+        verdict: totalTime < 5000 ? 'SIMPLIFIED_PROMPTS_VIABLE_FOR_EA' : 'EVEN_SIMPLIFIED_TOO_SLOW'
       },
-      diagnostics: {
-        issue: totalTime < 10000 ? 
-          'Comprehensive prompts work fine - issue must be in research agent backend routing' :
-          'Comprehensive prompts too complex for Netlify - need simpler prompts or switch to Gemini',
-        recommendation: totalTime < 5000 ?
-          'Comprehensive prompts are fast enough - debug research agent backend' :
-          totalTime < 10000 ?
-          'Comprehensive prompts are borderline - optimize or consider Gemini' :
-          'Switch to Gemini API or dramatically simplify prompts'
+      viabilityAssessment: {
+        forBasicEA: totalTime < 5000 ? 'VIABLE' : 'NOT_VIABLE',
+        qualityTradeoff: totalTime < 5000 ? 'Acceptable quality with speed' : 'Quality insufficient for speed gained',
+        recommendation: totalTime < 3000 ? 
+          'Simplified Claude prompts work - build basic EA agent' :
+          totalTime < 5000 ?
+          'Simplified prompts borderline - consider Gemini for better experience' :
+          'Switch to Gemini - even simplified Claude too slow'
       },
       timestamp: new Date().toISOString()
     };
 
-    console.log(`Claude comprehensive test completed: ${apiCallTime}ms API, ${totalTime}ms total`);
+    console.log(`Claude simplified test completed: ${apiCallTime}ms API, ${totalTime}ms total`);
     
     return {
       statusCode: 200,
@@ -172,21 +146,20 @@ Focus on actionable insights for C-level decision makers. Provide specific, data
   } catch (error) {
     const responseTime = Date.now() - startTime;
     
-    console.error('Claude comprehensive test error:', error);
+    console.error('Claude simplified test error:', error);
     
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: 'Claude test failed: ' + error.message,
+        error: 'Simplified test failed: ' + error.message,
         timing: {
           totalFunctionTime: responseTime,
           underNetlifyLimit: responseTime < 10000
         },
-        diagnostics: {
-          issue: 'Function execution error with comprehensive prompt - not necessarily Claude API speed issue',
-          recommendation: 'Debug function code, check prompt complexity, or test with simpler prompt'
+        viabilityAssessment: {
+          recommendation: 'Function error suggests fundamental issue - consider Gemini API'
         }
       })
     };
