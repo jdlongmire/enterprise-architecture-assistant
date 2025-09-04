@@ -1,44 +1,35 @@
-// Technology Research Agent - Simplified Fast Version
+// Technology Research Agent - Ultra-Minimal Claude-Only Version
 class TechnologyResearchAgent {
     constructor() {
         this.currentResearch = null;
-        this.progressCallback = null;
-        this.resultCallback = null;
         this.init();
     }
 
     init() {
-        console.log('Technology Research Agent initialized (Fast Version)');
+        console.log('Technology Research Agent initialized (Ultra-Minimal Claude-Only)');
     }
 
-    // Main research orchestration method - simplified workflow
+    // Ultra-minimal research - single Claude call only
     async conductResearch(technology, options = {}) {
         this.currentResearch = {
             id: this.generateAnalysisId(),
             technology: technology,
             options: options,
             startTime: new Date(),
-            searchData: {},
             analysis: {},
             artifacts: []
         };
 
         try {
-            this.updateProgress('Initializing comprehensive research...', 0);
+            this.updateProgress('Starting analysis...', 10);
 
-            // Phase 1: Single Comprehensive Search
-            await this.gatherComprehensiveIntelligence(technology);
-            this.updateProgress('Market intelligence gathered', 25);
+            // Single streamlined Claude analysis - no web search
+            await this.conductStreamlinedAnalysis(technology);
+            this.updateProgress('Analysis complete', 70);
 
-            // Phase 2: Single Comprehensive Analysis
-            await this.conductComprehensiveAnalysis(technology);
-            this.updateProgress('Comprehensive analysis complete', 75);
-
-            // Phase 3: Generate Artifacts
-            if (options.generateArtifacts !== false) {
-                await this.generateArtifacts();
-                this.updateProgress('Artifacts generated', 100);
-            }
+            // Generate artifacts
+            await this.generateArtifacts();
+            this.updateProgress('Artifacts generated', 100);
 
             // Complete research
             this.currentResearch.endTime = new Date();
@@ -68,93 +59,47 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Single comprehensive search instead of multiple searches
-    async gatherComprehensiveIntelligence(technology) {
-        this.setActiveStep('step-search');
-        
-        try {
-            // Single comprehensive search query
-            const comprehensiveQuery = `${technology} market analysis vendor landscape Gartner Forrester 2024 enterprise implementation`;
-            
-            const searchResult = await this.callAPI('search', {
-                query: comprehensiveQuery,
-                searchType: 'market',
-                maxResults: 10
-            });
-
-            this.currentResearch.searchData = searchResult.results;
-            this.setStepCompleted('step-search');
-            
-        } catch (error) {
-            console.error('Web intelligence gathering failed:', error);
-            // Continue with analysis using existing knowledge
-            this.currentResearch.searchData = [];
-        }
-    }
-
-    // Single comprehensive analysis instead of multiple phases
-    async conductComprehensiveAnalysis(technology) {
+    // Single streamlined analysis using Claude's built-in knowledge
+    async conductStreamlinedAnalysis(technology) {
         this.setActiveStep('step-market');
-        this.setActiveStep('step-vendor');
-        this.setActiveStep('step-strategic');
         
         try {
-            // Create comprehensive prompt that covers all analysis areas
-            const comprehensivePrompt = this.createComprehensivePrompt(technology);
-            
-            const analysis = await this.callAPI('claude', {
-                prompt: comprehensivePrompt,
-                options: {
-                    maxTokens: 4000,
-                    temperature: 0.3
-                }
-            });
+            // Short, focused prompt to avoid timeouts
+            const prompt = `Analyze ${technology} technology for enterprise architecture decisions.
 
-            // Parse the comprehensive analysis into sections
-            this.parseComprehensiveAnalysis(analysis.content);
+Provide a concise analysis with these sections:
+
+MARKET OVERVIEW:
+Brief market status, key adoption trends, and growth outlook.
+
+VENDOR LANDSCAPE:
+Top 3-4 market leaders and their positioning.
+
+MATURITY ASSESSMENT:
+Current maturity level and implementation readiness.
+
+STRATEGIC RECOMMENDATIONS:
+Key recommendations for enterprise adoption.
+
+Keep response under 1500 words total.`;
+
+            const analysis = await this.callClaudeAPI(prompt);
+            
+            // Parse into sections
+            this.parseAnalysis(analysis);
             
             this.setStepCompleted('step-market');
             this.setStepCompleted('step-vendor');
             this.setStepCompleted('step-strategic');
             
         } catch (error) {
-            console.error('Comprehensive analysis failed:', error);
+            console.error('Analysis failed:', error);
             throw new Error('Analysis failed: ' + error.message);
         }
     }
 
-    // Create a comprehensive prompt that covers all research areas
-    createComprehensivePrompt(technology) {
-        const searchContext = this.currentResearch.searchData
-            .map(result => `**${result.title}**\n${result.snippet}\nSource: ${result.url}`)
-            .join('\n\n');
-
-        return `You are a senior enterprise technology analyst. Using the current market intelligence below, provide a comprehensive analysis for ${technology}.
-
-CURRENT MARKET INTELLIGENCE:
-${searchContext}
-
-Please provide a comprehensive analysis with the following sections:
-
-# MARKET RESEARCH
-Analyze market size, growth trends, key drivers, industry adoption patterns, and geographic trends. Include specific data and projections where available.
-
-# VENDOR ANALYSIS  
-Identify market leaders, competitive positioning, emerging players, and selection criteria. Use specific vendor names and market positioning from the sources.
-
-# HYPE CYCLE ANALYSIS
-Assess the technology's current position on the hype cycle, maturity indicators, adoption timeline, and implementation readiness. 
-
-# STRATEGIC SUMMARY
-Develop strategic recommendations including value proposition, implementation approaches, success factors, risk assessment, and recommended timeline.
-
-Focus on actionable insights based on the current market intelligence provided. Use specific data, vendor names, and market positioning from the sources above.
-
-Format each section with clear headers and provide comprehensive analysis for enterprise decision-making.`;
-    }
-
-    // Parse comprehensive analysis into structured sections
-    parseComprehensiveAnalysis(analysisText) {
+    // Parse analysis into structured sections
+    parseAnalysis(analysisText) {
         const sections = {
             marketResearch: '',
             vendorAnalysis: '',
@@ -162,74 +107,31 @@ Format each section with clear headers and provide comprehensive analysis for en
             strategicSummary: ''
         };
 
-        // Split analysis by headers
-        const marketMatch = analysisText.match(/# MARKET RESEARCH([\s\S]*?)(?=# |$)/i);
-        const vendorMatch = analysisText.match(/# VENDOR ANALYSIS([\s\S]*?)(?=# |$)/i);
-        const hypeMatch = analysisText.match(/# HYPE CYCLE ANALYSIS([\s\S]*?)(?=# |$)/i);
-        const strategicMatch = analysisText.match(/# STRATEGIC SUMMARY([\s\S]*?)(?=# |$)/i);
+        // Split by sections
+        const marketMatch = analysisText.match(/MARKET OVERVIEW:([\s\S]*?)(?=VENDOR LANDSCAPE:|$)/i);
+        const vendorMatch = analysisText.match(/VENDOR LANDSCAPE:([\s\S]*?)(?=MATURITY ASSESSMENT:|$)/i);
+        const maturityMatch = analysisText.match(/MATURITY ASSESSMENT:([\s\S]*?)(?=STRATEGIC RECOMMENDATIONS:|$)/i);
+        const strategicMatch = analysisText.match(/STRATEGIC RECOMMENDATIONS:([\s\S]*?)$/i);
 
         if (marketMatch) sections.marketResearch = marketMatch[1].trim();
         if (vendorMatch) sections.vendorAnalysis = vendorMatch[1].trim();
-        if (hypeMatch) sections.hypeCycleData = hypeMatch[1].trim();
+        if (maturityMatch) sections.hypeCycleData = maturityMatch[1].trim();
         if (strategicMatch) sections.strategicSummary = strategicMatch[1].trim();
 
-        // Fallback: if sections not properly parsed, use the full analysis
-        if (!sections.marketResearch && !sections.vendorAnalysis) {
-            sections.marketResearch = analysisText.substring(0, analysisText.length / 4);
-            sections.vendorAnalysis = analysisText.substring(analysisText.length / 4, analysisText.length / 2);
-            sections.hypeCycleData = analysisText.substring(analysisText.length / 2, 3 * analysisText.length / 4);
-            sections.strategicSummary = analysisText.substring(3 * analysisText.length / 4);
+        // Fallback: use full text if parsing fails
+        if (!sections.marketResearch) {
+            const quarters = Math.ceil(analysisText.length / 4);
+            sections.marketResearch = analysisText.substring(0, quarters);
+            sections.vendorAnalysis = analysisText.substring(quarters, quarters * 2);
+            sections.hypeCycleData = analysisText.substring(quarters * 2, quarters * 3);
+            sections.strategicSummary = analysisText.substring(quarters * 3);
         }
 
         this.currentResearch.analysis = sections;
     }
 
-    // Generate downloadable artifacts (unchanged from original)
-    async generateArtifacts() {
-        this.setActiveStep('step-artifacts');
-        
-        try {
-            const artifacts = [];
-
-            // Generate Executive Summary PDF
-            if (this.currentResearch.analysis.strategicSummary) {
-                const pdfArtifact = await this.generateExecutivePDF();
-                artifacts.push(pdfArtifact);
-            }
-
-            // Generate Market Analysis PDF
-            if (this.currentResearch.analysis.marketResearch) {
-                const marketPdf = await this.generateMarketAnalysisPDF();
-                artifacts.push(marketPdf);
-            }
-
-            // Generate Hype Cycle Chart
-            if (this.currentResearch.analysis.hypeCycleData) {
-                const hypeCycleChart = await this.generateHypeCycleChart();
-                artifacts.push(hypeCycleChart);
-            }
-
-            // Generate Vendor Landscape Chart
-            if (this.currentResearch.analysis.vendorAnalysis) {
-                const vendorChart = await this.generateVendorChart();
-                artifacts.push(vendorChart);
-            }
-
-            // Generate Analysis Data (JSON)
-            const dataArtifact = this.generateAnalysisData();
-            artifacts.push(dataArtifact);
-
-            this.currentResearch.artifacts = artifacts;
-            this.setStepCompleted('step-artifacts');
-            
-        } catch (error) {
-            console.error('Artifact generation failed:', error);
-            throw new Error('Artifact generation failed: ' + error.message);
-        }
-    }
-
-    // Call backend API (simplified error handling)
-    async callAPI(endpoint, data) {
+    // Direct Claude API call - bypassing backend search complexity
+    async callClaudeAPI(prompt) {
         try {
             const response = await fetch(EA_CONFIG.api.baseUrl, {
                 method: 'POST',
@@ -237,13 +139,17 @@ Format each section with clear headers and provide comprehensive analysis for en
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    endpoint: endpoint,
-                    ...data
+                    endpoint: 'claude',
+                    prompt: prompt,
+                    options: {
+                        maxTokens: 1500,  // Shorter to reduce processing time
+                        temperature: 0.3
+                    }
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+                throw new Error(`API call failed: ${response.status}`);
             }
 
             const result = await response.json();
@@ -252,232 +158,219 @@ Format each section with clear headers and provide comprehensive analysis for en
                 throw new Error(result.error || 'API call failed');
             }
 
-            return result;
+            return result.content;
             
         } catch (error) {
-            console.error('API call failed:', error);
+            console.error('Claude API call failed:', error);
             throw error;
         }
     }
 
-    // PDF generation methods (unchanged from original)
+    // Generate artifacts (simplified versions)
+    async generateArtifacts() {
+        this.setActiveStep('step-artifacts');
+        
+        try {
+            const artifacts = [];
+
+            // Executive Summary PDF
+            const execPdf = await this.generateExecutivePDF();
+            artifacts.push(execPdf);
+
+            // Technology Assessment PDF  
+            const techPdf = await this.generateTechnologyPDF();
+            artifacts.push(techPdf);
+
+            // Simple Hype Cycle Chart
+            const chart = await this.generateSimpleChart();
+            artifacts.push(chart);
+
+            // Analysis Data JSON
+            const data = this.generateAnalysisData();
+            artifacts.push(data);
+
+            this.currentResearch.artifacts = artifacts;
+            this.setStepCompleted('step-artifacts');
+            
+        } catch (error) {
+            console.error('Artifact generation failed:', error);
+            // Continue even if artifacts fail
+            this.currentResearch.artifacts = [];
+        }
+    }
+
     async generateExecutivePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Title
-        doc.setFontSize(20);
-        doc.setFont(undefined, 'bold');
-        doc.text('Enterprise Architecture Analysis', 20, 30);
-        
-        doc.setFontSize(16);
-        doc.text(`Technology: ${this.currentResearch.technology}`, 20, 45);
-        
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 55);
-        
-        // Executive Summary
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('Executive Summary', 20, 75);
-        
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        
-        const summary = this.currentResearch.analysis.strategicSummary || 'Strategic analysis data not available.';
-        const lines = doc.splitTextToSize(summary.substring(0, 2000), 170);
-        doc.text(lines, 20, 85);
-        
-        const pdfBlob = doc.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        
-        return {
-            type: 'pdf',
-            name: `${this.currentResearch.technology}_Executive_Summary.pdf`,
-            title: 'Executive Summary',
-            description: 'Strategic analysis and recommendations',
-            url: pdfUrl,
-            icon: 'fas fa-file-pdf'
-        };
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('Technology Analysis Report', 20, 30);
+            
+            doc.setFontSize(14);
+            doc.text(`Technology: ${this.currentResearch.technology}`, 20, 45);
+            
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 55);
+            doc.text('Source: Enterprise Architecture Assistant', 20, 60);
+            
+            // Strategic Summary
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Strategic Summary', 20, 75);
+            
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            
+            const summary = this.currentResearch.analysis.strategicSummary || 'Strategic analysis completed';
+            const lines = doc.splitTextToSize(summary.substring(0, 1500), 170);
+            doc.text(lines, 20, 85);
+            
+            const blob = doc.output('blob');
+            const url = URL.createObjectURL(blob);
+            
+            return {
+                type: 'pdf',
+                name: `${this.currentResearch.technology.replace(/\s+/g, '_')}_Executive_Summary.pdf`,
+                title: 'Executive Summary',
+                description: 'Strategic analysis and recommendations',
+                url: url,
+                icon: 'fas fa-file-pdf'
+            };
+        } catch (error) {
+            console.error('PDF generation failed:', error);
+            return null;
+        }
     }
 
-    async generateMarketAnalysisPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Title
-        doc.setFontSize(20);
-        doc.setFont(undefined, 'bold');
-        doc.text('Market Analysis Report', 20, 30);
-        
-        doc.setFontSize(16);
-        doc.text(`Technology: ${this.currentResearch.technology}`, 20, 45);
-        
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 55);
-        
-        // Market Analysis
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('Market Research', 20, 75);
-        
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        
-        const marketData = this.currentResearch.analysis.marketResearch || 'Market research data not available.';
-        const lines = doc.splitTextToSize(marketData.substring(0, 2000), 170);
-        doc.text(lines, 20, 85);
-        
-        const pdfBlob = doc.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        
-        return {
-            type: 'pdf',
-            name: `${this.currentResearch.technology}_Market_Analysis.pdf`,
-            title: 'Market Analysis',
-            description: 'Comprehensive market research and trends',
-            url: pdfUrl,
-            icon: 'fas fa-chart-line'
-        };
-    }
-
-    async generateHypeCycleChart() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 600;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw hype cycle curve
-        ctx.strokeStyle = '#3498db';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(50, 500);
-        ctx.quadraticCurveTo(200, 100, 350, 450);
-        ctx.quadraticCurveTo(550, 350, 750, 300);
-        ctx.stroke();
-        
-        // Add labels
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = '14px Arial';
-        ctx.fillText('Innovation Trigger', 60, 530);
-        ctx.fillText('Peak of Inflated Expectations', 150, 80);
-        ctx.fillText('Trough of Disillusionment', 320, 480);
-        ctx.fillText('Slope of Enlightenment', 500, 380);
-        ctx.fillText('Plateau of Productivity', 600, 280);
-        
-        // Position technology
-        ctx.fillStyle = '#e74c3c';
-        ctx.beginPath();
-        ctx.arc(400, 400, 8, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText(this.currentResearch.technology, 420, 405);
-        
-        const chartBlob = await new Promise(resolve => canvas.toBlob(resolve));
-        const chartUrl = URL.createObjectURL(chartBlob);
-        
-        return {
-            type: 'image',
-            name: `${this.currentResearch.technology}_Hype_Cycle.png`,
-            title: 'Hype Cycle Chart',
-            description: 'Technology maturity positioning',
-            url: chartUrl,
-            icon: 'fas fa-chart-area'
-        };
-    }
-
-    async generateVendorChart() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 600;
-        const ctx = canvas.getContext('2d');
-        
-        // Background
-        ctx.fillStyle = '#f8f9fa';
-        ctx.fillRect(0, 0, 800, 600);
-        
-        // Draw axes
-        ctx.strokeStyle = '#2c3e50';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(100, 500);
-        ctx.lineTo(700, 500);
-        ctx.moveTo(100, 100);
-        ctx.lineTo(100, 500);
-        ctx.stroke();
-        
-        // Labels
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = '14px Arial';
-        ctx.fillText('Market Share', 350, 540);
-        ctx.save();
-        ctx.translate(50, 300);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText('Innovation', 0, 0);
-        ctx.restore();
-        
-        // Title
-        ctx.font = 'bold 18px Arial';
-        ctx.fillText(`${this.currentResearch.technology} Vendor Landscape`, 250, 40);
-        
-        // Extract vendor names from analysis or use placeholders
-        const vendorAnalysis = this.currentResearch.analysis.vendorAnalysis || '';
-        const detectedVendors = this.extractVendorNames(vendorAnalysis);
-        
-        const vendors = detectedVendors.length > 0 ? detectedVendors : [
-            { name: 'Leader A', x: 500, y: 200, color: '#3498db' },
-            { name: 'Leader B', x: 450, y: 250, color: '#3498db' },
-            { name: 'Challenger C', x: 350, y: 300, color: '#f39c12' },
-            { name: 'Niche D', x: 250, y: 180, color: '#9b59b6' }
-        ];
-        
-        vendors.forEach(vendor => {
-            ctx.fillStyle = vendor.color;
-            ctx.beginPath();
-            ctx.arc(vendor.x, vendor.y, 10, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = '12px Arial';
-            ctx.fillText(vendor.name, vendor.x + 15, vendor.y + 5);
-        });
-        
-        const chartBlob = await new Promise(resolve => canvas.toBlob(resolve));
-        const chartUrl = URL.createObjectURL(chartBlob);
-        
-        return {
-            type: 'image',
-            name: `${this.currentResearch.technology}_Vendor_Landscape.png`,
-            title: 'Vendor Landscape',
-            description: 'Competitive positioning analysis',
-            url: chartUrl,
-            icon: 'fas fa-building'
-        };
-    }
-
-    // Extract vendor names from analysis text
-    extractVendorNames(text) {
-        const commonVendors = [
-            'Microsoft', 'Google', 'Amazon', 'IBM', 'Oracle', 'Salesforce', 'SAP', 'Cisco',
-            'VMware', 'Dell', 'HP', 'Intel', 'NVIDIA', 'Adobe', 'Workday', 'ServiceNow',
-            'Palo Alto Networks', 'CrowdStrike', 'Zscaler', 'Okta', 'Splunk', 'Tableau'
-        ];
-        
-        const foundVendors = [];
-        commonVendors.forEach((vendor, index) => {
-            if (text.includes(vendor)) {
-                foundVendors.push({
-                    name: vendor,
-                    x: 200 + (index % 4) * 150,
-                    y: 200 + Math.floor(index / 4) * 100,
-                    color: index < 2 ? '#3498db' : index < 4 ? '#f39c12' : '#9b59b6'
-                });
+    async generateTechnologyPDF() {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('Technology Assessment', 20, 30);
+            
+            doc.setFontSize(14);
+            doc.text(`${this.currentResearch.technology}`, 20, 45);
+            
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 55);
+            
+            // Market Overview
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Market Overview', 20, 75);
+            
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            const market = this.currentResearch.analysis.marketResearch || 'Market analysis completed';
+            const marketLines = doc.splitTextToSize(market.substring(0, 800), 170);
+            doc.text(marketLines, 20, 85);
+            
+            // Vendor Landscape (new page if needed)
+            const yPos = 85 + (marketLines.length * 4) + 10;
+            if (yPos > 250) {
+                doc.addPage();
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('Vendor Landscape', 20, 30);
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                const vendor = this.currentResearch.analysis.vendorAnalysis || 'Vendor analysis completed';
+                const vendorLines = doc.splitTextToSize(vendor.substring(0, 800), 170);
+                doc.text(vendorLines, 20, 40);
             }
-        });
-        
-        return foundVendors.slice(0, 6); // Limit to 6 vendors for clean chart
+            
+            const blob = doc.output('blob');
+            const url = URL.createObjectURL(blob);
+            
+            return {
+                type: 'pdf',
+                name: `${this.currentResearch.technology.replace(/\s+/g, '_')}_Technology_Assessment.pdf`,
+                title: 'Technology Assessment',
+                description: 'Market and vendor analysis',
+                url: url,
+                icon: 'fas fa-chart-bar'
+            };
+        } catch (error) {
+            console.error('Tech PDF generation failed:', error);
+            return null;
+        }
+    }
+
+    async generateSimpleChart() {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, 600, 400);
+            
+            // Title
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${this.currentResearch.technology} - Technology Maturity`, 300, 30);
+            
+            // Simple maturity indicator
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(50, 200);
+            ctx.lineTo(550, 200);
+            ctx.stroke();
+            
+            // Maturity stages
+            const stages = ['Emerging', 'Developing', 'Maturing', 'Established'];
+            stages.forEach((stage, index) => {
+                const x = 50 + (index * 125);
+                ctx.fillStyle = '#34495e';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(stage, x, 180);
+                
+                // Stage marker
+                ctx.fillStyle = '#95a5a6';
+                ctx.beginPath();
+                ctx.arc(x, 200, 6, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // Technology position (example: stage 2-3)
+            const techX = 175; // Between Developing and Maturing
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(techX, 200, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Current Position', techX, 240);
+            
+            const blob = await new Promise(resolve => canvas.toBlob(resolve));
+            const url = URL.createObjectURL(blob);
+            
+            return {
+                type: 'image',
+                name: `${this.currentResearch.technology.replace(/\s+/g, '_')}_Maturity_Chart.png`,
+                title: 'Maturity Chart',
+                description: 'Technology maturity assessment',
+                url: url,
+                icon: 'fas fa-chart-line'
+            };
+        } catch (error) {
+            console.error('Chart generation failed:', error);
+            return null;
+        }
     }
 
     generateAnalysisData() {
@@ -486,34 +379,34 @@ Format each section with clear headers and provide comprehensive analysis for en
                 id: this.currentResearch.id,
                 technology: this.currentResearch.technology,
                 timestamp: this.currentResearch.startTime.toISOString(),
-                agent: 'Technology Research Agent (Fast)',
-                searchSources: this.currentResearch.searchData.length
+                agent: 'Technology Research Agent (Ultra-Minimal)',
+                version: 'claude-only'
             },
-            analysis: this.currentResearch.analysis,
-            searchData: this.currentResearch.searchData
+            analysis: this.currentResearch.analysis
         };
         
-        const dataBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const dataUrl = URL.createObjectURL(dataBlob);
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
         
         return {
             type: 'json',
-            name: `${this.currentResearch.technology}_Analysis_Data.json`,
+            name: `${this.currentResearch.technology.replace(/\s+/g, '_')}_Analysis_Data.json`,
             title: 'Analysis Data',
-            description: 'Complete research data and metadata',
-            url: dataUrl,
+            description: 'Complete research data',
+            url: url,
             icon: 'fas fa-database'
         };
     }
 
-    // UI helper methods (unchanged)
+    // UI helper methods
     showResults() {
         document.getElementById('research-progress').style.display = 'none';
         document.getElementById('research-results').style.display = 'block';
         
         const artifactGrid = document.getElementById('artifact-grid');
         if (artifactGrid && this.currentResearch.artifacts) {
-            artifactGrid.innerHTML = this.currentResearch.artifacts.map(artifact => `
+            const validArtifacts = this.currentResearch.artifacts.filter(a => a !== null);
+            artifactGrid.innerHTML = validArtifacts.map(artifact => `
                 <div class="artifact-card" onclick="window.open('${artifact.url}', '_blank')">
                     <i class="${artifact.icon}"></i>
                     <h5>${artifact.title}</h5>
@@ -530,17 +423,11 @@ Format each section with clear headers and provide comprehensive analysis for en
         
         if (progressText) progressText.textContent = message;
         if (progressFill) progressFill.style.width = `${percentage}%`;
-        
-        if (this.progressCallback) {
-            this.progressCallback(message, percentage);
-        }
     }
 
     setActiveStep(stepId) {
         const step = document.getElementById(stepId);
-        if (step) {
-            step.classList.add('active');
-        }
+        if (step) step.classList.add('active');
     }
 
     setStepCompleted(stepId) {
@@ -559,10 +446,7 @@ Format each section with clear headers and provide comprehensive analysis for en
         console.error('Research error:', error);
         
         if (window.eaApp) {
-            window.eaApp.showToast(
-                `Research failed: ${error.message}`, 
-                'error'
-            );
+            window.eaApp.showToast(`Research failed: ${error.message}`, 'error');
         }
         
         // Reset interface
@@ -571,5 +455,5 @@ Format each section with clear headers and provide comprehensive analysis for en
     }
 }
 
-// Initialize the simplified Technology Research Agent
+// Initialize the ultra-minimal Technology Research Agent
 window.technologyResearch = new TechnologyResearchAgent();
