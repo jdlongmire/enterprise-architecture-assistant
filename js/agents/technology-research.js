@@ -1,4 +1,4 @@
-// Technology Research Agent - Enhanced with Web Search
+// Technology Research Agent - Simplified Fast Version
 class TechnologyResearchAgent {
     constructor() {
         this.currentResearch = null;
@@ -8,54 +8,33 @@ class TechnologyResearchAgent {
     }
 
     init() {
-        console.log('Technology Research Agent initialized with web search capabilities');
+        console.log('Technology Research Agent initialized (Fast Version)');
     }
 
-    // Main research orchestration method
+    // Main research orchestration method - simplified workflow
     async conductResearch(technology, options = {}) {
         this.currentResearch = {
             id: this.generateAnalysisId(),
             technology: technology,
             options: options,
             startTime: new Date(),
-            phases: [],
             searchData: {},
             analysis: {},
             artifacts: []
         };
 
         try {
-            this.updateProgress('Initializing research pipeline...', 0);
+            this.updateProgress('Initializing comprehensive research...', 0);
 
-            // Phase 1: Web Search Intelligence Gathering
-            await this.gatherWebIntelligence(technology);
-            this.updateProgress('Web intelligence gathered', 20);
+            // Phase 1: Single Comprehensive Search
+            await this.gatherComprehensiveIntelligence(technology);
+            this.updateProgress('Market intelligence gathered', 25);
 
-            // Phase 2: Market Analysis
-            if (options.includeMarketResearch !== false) {
-                await this.conductMarketAnalysis(technology);
-                this.updateProgress('Market analysis complete', 40);
-            }
+            // Phase 2: Single Comprehensive Analysis
+            await this.conductComprehensiveAnalysis(technology);
+            this.updateProgress('Comprehensive analysis complete', 75);
 
-            // Phase 3: Vendor Analysis
-            if (options.includeVendorAnalysis !== false) {
-                await this.conductVendorAnalysis(technology);
-                this.updateProgress('Vendor analysis complete', 60);
-            }
-
-            // Phase 4: Hype Cycle Analysis
-            if (options.includeHypeCycle !== false) {
-                await this.conductHypeCycleAnalysis(technology);
-                this.updateProgress('Hype cycle analysis complete', 80);
-            }
-
-            // Phase 5: Strategic Analysis
-            if (options.includeStrategicSummary !== false) {
-                await this.conductStrategicAnalysis(technology);
-                this.updateProgress('Strategic analysis complete', 90);
-            }
-
-            // Phase 6: Generate Artifacts
+            // Phase 3: Generate Artifacts
             if (options.generateArtifacts !== false) {
                 await this.generateArtifacts();
                 this.updateProgress('Artifacts generated', 100);
@@ -89,157 +68,123 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Gather web intelligence across multiple search queries
-    async gatherWebIntelligence(technology) {
+    // Single comprehensive search instead of multiple searches
+    async gatherComprehensiveIntelligence(technology) {
         this.setActiveStep('step-search');
         
         try {
-            const searchQueries = [
-                { query: `${technology} market analysis 2024`, type: 'market' },
-                { query: `${technology} vendor landscape`, type: 'vendor' },
-                { query: `${technology} Gartner hype cycle`, type: 'hype' },
-                { query: `${technology} enterprise implementation`, type: 'technology' }
-            ];
-
-            const searchResults = await Promise.all(
-                searchQueries.map(async (searchQuery) => {
-                    const result = await this.callAPI('search', {
-                        query: searchQuery.query,
-                        searchType: searchQuery.type,
-                        maxResults: 5
-                    });
-                    return { type: searchQuery.type, data: result.results };
-                })
-            );
-
-            // Store web intelligence
-            this.currentResearch.searchData = {};
-            searchResults.forEach(result => {
-                this.currentResearch.searchData[result.type] = result.data;
+            // Single comprehensive search query
+            const comprehensiveQuery = `${technology} market analysis vendor landscape Gartner Forrester 2024 enterprise implementation`;
+            
+            const searchResult = await this.callAPI('search', {
+                query: comprehensiveQuery,
+                searchType: 'market',
+                maxResults: 10
             });
 
+            this.currentResearch.searchData = searchResult.results;
             this.setStepCompleted('step-search');
             
         } catch (error) {
             console.error('Web intelligence gathering failed:', error);
             // Continue with analysis using existing knowledge
-            this.currentResearch.searchData = {};
+            this.currentResearch.searchData = [];
         }
     }
 
-    // Conduct market analysis using enhanced prompts
-    async conductMarketAnalysis(technology) {
+    // Single comprehensive analysis instead of multiple phases
+    async conductComprehensiveAnalysis(technology) {
         this.setActiveStep('step-market');
-        
-        try {
-            const analysis = await this.callAPI('research', {
-                technology: technology,
-                researchPhase: 'market',
-                options: {
-                    maxTokens: 3000,
-                    temperature: 0.3
-                }
-            });
-
-            this.currentResearch.analysis.marketResearch = analysis.analysis;
-            this.currentResearch.phases.push({
-                phase: 'market',
-                completedAt: new Date(),
-                searchSources: analysis.searchData?.length || 0
-            });
-
-            this.setStepCompleted('step-market');
-            
-        } catch (error) {
-            console.error('Market analysis failed:', error);
-            throw new Error('Market analysis failed: ' + error.message);
-        }
-    }
-
-    // Conduct vendor analysis
-    async conductVendorAnalysis(technology) {
         this.setActiveStep('step-vendor');
-        
-        try {
-            const analysis = await this.callAPI('research', {
-                technology: technology,
-                researchPhase: 'vendor',
-                options: {
-                    maxTokens: 3000,
-                    temperature: 0.3
-                }
-            });
-
-            this.currentResearch.analysis.vendorAnalysis = analysis.analysis;
-            this.currentResearch.phases.push({
-                phase: 'vendor',
-                completedAt: new Date(),
-                searchSources: analysis.searchData?.length || 0
-            });
-
-            this.setStepCompleted('step-vendor');
-            
-        } catch (error) {
-            console.error('Vendor analysis failed:', error);
-            throw new Error('Vendor analysis failed: ' + error.message);
-        }
-    }
-
-    // Conduct hype cycle analysis
-    async conductHypeCycleAnalysis(technology) {
         this.setActiveStep('step-strategic');
         
         try {
-            const analysis = await this.callAPI('research', {
-                technology: technology,
-                researchPhase: 'hype',
+            // Create comprehensive prompt that covers all analysis areas
+            const comprehensivePrompt = this.createComprehensivePrompt(technology);
+            
+            const analysis = await this.callAPI('claude', {
+                prompt: comprehensivePrompt,
                 options: {
-                    maxTokens: 2000,
+                    maxTokens: 4000,
                     temperature: 0.3
                 }
             });
 
-            this.currentResearch.analysis.hypeCycleData = analysis.analysis;
-            this.currentResearch.phases.push({
-                phase: 'hype',
-                completedAt: new Date(),
-                searchSources: analysis.searchData?.length || 0
-            });
-
+            // Parse the comprehensive analysis into sections
+            this.parseComprehensiveAnalysis(analysis.content);
+            
+            this.setStepCompleted('step-market');
+            this.setStepCompleted('step-vendor');
             this.setStepCompleted('step-strategic');
             
         } catch (error) {
-            console.error('Hype cycle analysis failed:', error);
-            throw new Error('Hype cycle analysis failed: ' + error.message);
+            console.error('Comprehensive analysis failed:', error);
+            throw new Error('Analysis failed: ' + error.message);
         }
     }
 
-    // Conduct strategic analysis
-    async conductStrategicAnalysis(technology) {
-        try {
-            const analysis = await this.callAPI('research', {
-                technology: technology,
-                researchPhase: 'strategic',
-                options: {
-                    maxTokens: 3000,
-                    temperature: 0.3
-                }
-            });
+    // Create a comprehensive prompt that covers all research areas
+    createComprehensivePrompt(technology) {
+        const searchContext = this.currentResearch.searchData
+            .map(result => `**${result.title}**\n${result.snippet}\nSource: ${result.url}`)
+            .join('\n\n');
 
-            this.currentResearch.analysis.strategicSummary = analysis.analysis;
-            this.currentResearch.phases.push({
-                phase: 'strategic',
-                completedAt: new Date(),
-                searchSources: analysis.searchData?.length || 0
-            });
-            
-        } catch (error) {
-            console.error('Strategic analysis failed:', error);
-            throw new Error('Strategic analysis failed: ' + error.message);
-        }
+        return `You are a senior enterprise technology analyst. Using the current market intelligence below, provide a comprehensive analysis for ${technology}.
+
+CURRENT MARKET INTELLIGENCE:
+${searchContext}
+
+Please provide a comprehensive analysis with the following sections:
+
+# MARKET RESEARCH
+Analyze market size, growth trends, key drivers, industry adoption patterns, and geographic trends. Include specific data and projections where available.
+
+# VENDOR ANALYSIS  
+Identify market leaders, competitive positioning, emerging players, and selection criteria. Use specific vendor names and market positioning from the sources.
+
+# HYPE CYCLE ANALYSIS
+Assess the technology's current position on the hype cycle, maturity indicators, adoption timeline, and implementation readiness. 
+
+# STRATEGIC SUMMARY
+Develop strategic recommendations including value proposition, implementation approaches, success factors, risk assessment, and recommended timeline.
+
+Focus on actionable insights based on the current market intelligence provided. Use specific data, vendor names, and market positioning from the sources above.
+
+Format each section with clear headers and provide comprehensive analysis for enterprise decision-making.`;
     }
 
-    // Generate downloadable artifacts
+    // Parse comprehensive analysis into structured sections
+    parseComprehensiveAnalysis(analysisText) {
+        const sections = {
+            marketResearch: '',
+            vendorAnalysis: '',
+            hypeCycleData: '',
+            strategicSummary: ''
+        };
+
+        // Split analysis by headers
+        const marketMatch = analysisText.match(/# MARKET RESEARCH([\s\S]*?)(?=# |$)/i);
+        const vendorMatch = analysisText.match(/# VENDOR ANALYSIS([\s\S]*?)(?=# |$)/i);
+        const hypeMatch = analysisText.match(/# HYPE CYCLE ANALYSIS([\s\S]*?)(?=# |$)/i);
+        const strategicMatch = analysisText.match(/# STRATEGIC SUMMARY([\s\S]*?)(?=# |$)/i);
+
+        if (marketMatch) sections.marketResearch = marketMatch[1].trim();
+        if (vendorMatch) sections.vendorAnalysis = vendorMatch[1].trim();
+        if (hypeMatch) sections.hypeCycleData = hypeMatch[1].trim();
+        if (strategicMatch) sections.strategicSummary = strategicMatch[1].trim();
+
+        // Fallback: if sections not properly parsed, use the full analysis
+        if (!sections.marketResearch && !sections.vendorAnalysis) {
+            sections.marketResearch = analysisText.substring(0, analysisText.length / 4);
+            sections.vendorAnalysis = analysisText.substring(analysisText.length / 4, analysisText.length / 2);
+            sections.hypeCycleData = analysisText.substring(analysisText.length / 2, 3 * analysisText.length / 4);
+            sections.strategicSummary = analysisText.substring(3 * analysisText.length / 4);
+        }
+
+        this.currentResearch.analysis = sections;
+    }
+
+    // Generate downloadable artifacts (unchanged from original)
     async generateArtifacts() {
         this.setActiveStep('step-artifacts');
         
@@ -283,7 +228,7 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Call backend API
+    // Call backend API (simplified error handling)
     async callAPI(endpoint, data) {
         try {
             const response = await fetch(EA_CONFIG.api.baseUrl, {
@@ -298,7 +243,7 @@ class TechnologyResearchAgent {
             });
 
             if (!response.ok) {
-                throw new Error(`API call failed: ${response.status}`);
+                throw new Error(`API call failed: ${response.status} ${response.statusText}`);
             }
 
             const result = await response.json();
@@ -315,7 +260,7 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Generate Executive Summary PDF
+    // PDF generation methods (unchanged from original)
     async generateExecutivePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -357,7 +302,6 @@ class TechnologyResearchAgent {
         };
     }
 
-    // Generate Market Analysis PDF
     async generateMarketAnalysisPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -399,7 +343,6 @@ class TechnologyResearchAgent {
         };
     }
 
-    // Generate Hype Cycle Chart
     async generateHypeCycleChart() {
         const canvas = document.createElement('canvas');
         canvas.width = 800;
@@ -446,7 +389,6 @@ class TechnologyResearchAgent {
         };
     }
 
-    // Generate Vendor Landscape Chart
     async generateVendorChart() {
         const canvas = document.createElement('canvas');
         canvas.width = 800;
@@ -481,8 +423,11 @@ class TechnologyResearchAgent {
         ctx.font = 'bold 18px Arial';
         ctx.fillText(`${this.currentResearch.technology} Vendor Landscape`, 250, 40);
         
-        // Sample vendor positions
-        const vendors = [
+        // Extract vendor names from analysis or use placeholders
+        const vendorAnalysis = this.currentResearch.analysis.vendorAnalysis || '';
+        const detectedVendors = this.extractVendorNames(vendorAnalysis);
+        
+        const vendors = detectedVendors.length > 0 ? detectedVendors : [
             { name: 'Leader A', x: 500, y: 200, color: '#3498db' },
             { name: 'Leader B', x: 450, y: 250, color: '#3498db' },
             { name: 'Challenger C', x: 350, y: 300, color: '#f39c12' },
@@ -512,19 +457,40 @@ class TechnologyResearchAgent {
         };
     }
 
-    // Generate analysis data as JSON
+    // Extract vendor names from analysis text
+    extractVendorNames(text) {
+        const commonVendors = [
+            'Microsoft', 'Google', 'Amazon', 'IBM', 'Oracle', 'Salesforce', 'SAP', 'Cisco',
+            'VMware', 'Dell', 'HP', 'Intel', 'NVIDIA', 'Adobe', 'Workday', 'ServiceNow',
+            'Palo Alto Networks', 'CrowdStrike', 'Zscaler', 'Okta', 'Splunk', 'Tableau'
+        ];
+        
+        const foundVendors = [];
+        commonVendors.forEach((vendor, index) => {
+            if (text.includes(vendor)) {
+                foundVendors.push({
+                    name: vendor,
+                    x: 200 + (index % 4) * 150,
+                    y: 200 + Math.floor(index / 4) * 100,
+                    color: index < 2 ? '#3498db' : index < 4 ? '#f39c12' : '#9b59b6'
+                });
+            }
+        });
+        
+        return foundVendors.slice(0, 6); // Limit to 6 vendors for clean chart
+    }
+
     generateAnalysisData() {
         const data = {
             metadata: {
                 id: this.currentResearch.id,
                 technology: this.currentResearch.technology,
                 timestamp: this.currentResearch.startTime.toISOString(),
-                agent: 'Technology Research Agent',
-                searchSources: Object.keys(this.currentResearch.searchData).length
+                agent: 'Technology Research Agent (Fast)',
+                searchSources: this.currentResearch.searchData.length
             },
             analysis: this.currentResearch.analysis,
-            searchData: this.currentResearch.searchData,
-            phases: this.currentResearch.phases
+            searchData: this.currentResearch.searchData
         };
         
         const dataBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -540,7 +506,7 @@ class TechnologyResearchAgent {
         };
     }
 
-    // Show research results
+    // UI helper methods (unchanged)
     showResults() {
         document.getElementById('research-progress').style.display = 'none';
         document.getElementById('research-results').style.display = 'block';
@@ -558,7 +524,6 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Update progress
     updateProgress(message, percentage) {
         const progressText = document.getElementById('progress-text');
         const progressFill = document.getElementById('progress-fill');
@@ -571,16 +536,13 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Set step as active
     setActiveStep(stepId) {
         const step = document.getElementById(stepId);
         if (step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             step.classList.add('active');
         }
     }
 
-    // Set step as completed
     setStepCompleted(stepId) {
         const step = document.getElementById(stepId);
         if (step) {
@@ -589,12 +551,10 @@ class TechnologyResearchAgent {
         }
     }
 
-    // Generate unique analysis ID
     generateAnalysisId() {
         return `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
-    // Handle errors
     handleError(error) {
         console.error('Research error:', error);
         
@@ -611,10 +571,5 @@ class TechnologyResearchAgent {
     }
 }
 
-// Initialize the Technology Research Agent
+// Initialize the simplified Technology Research Agent
 window.technologyResearch = new TechnologyResearchAgent();
-
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = TechnologyResearchAgent;
-}
