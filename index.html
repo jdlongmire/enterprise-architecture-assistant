@@ -3,70 +3,558 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Architecture Assistant</title>
+    <title>Enterprise Architecture AI Agents</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            color: #34495e;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .capabilities-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .capability-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .capability-item:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.15);
+        }
+
+        .capability-icon {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .capability-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .capability-desc {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+
+        /* Agents Grid */
+        .agents-section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .section-header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .agent-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .agent-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+
+        .agent-card.priority-1 {
+            border-left: 4px solid #27ae60;
+        }
+
+        .agent-card.priority-2 {
+            border-left: 4px solid #3498db;
+        }
+
+        .agent-card.priority-3 {
+            border-left: 4px solid #f39c12;
+        }
+
+        .agent-card.priority-4 {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .agent-card.priority-5 {
+            border-left: 4px solid #9b59b6;
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .agent-icon {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .priority-badge {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .agent-card h3 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .agent-card p {
+            color: #7f8c8d;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .features li {
+            color: #34495e;
+            padding: 5px 0;
+            font-size: 0.9rem;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .agent-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-ready {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-coming-soon {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .agent-metrics {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .recent-activity h3 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .activity-item i {
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #ecf0f1;
+        }
+
+        /* Settings */
+        .settings-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .settings-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-stats {
+                justify-content: center;
+            }
+
+            .header-title h1 {
+                font-size: 2rem;
+            }
+
+            .agents-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .capabilities-overview {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
             <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-sitemap"></i>
-                    <h1>Enterprise Architecture Assistant</h1>
+                <div class="header-title">
+                    <h1><i class="fas fa-cogs"></i> Enterprise Architecture AI Agents</h1>
+                    <p>Advanced AI-powered analysis tools for strategic technology assessment and enterprise architecture planning</p>
                 </div>
-                <div class="header-controls">
-                    <button class="btn-secondary" onclick="openSettings()">
-                        <i class="fas fa-cog"></i> Settings
-                    </button>
-                    <div class="status-indicator" id="status-indicator">
-                        <i class="fas fa-circle"></i>
-                        <span id="status-text">System Ready</span>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">AI Modules</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">33s</span>
+                        <span class="stat-label">Analysis Time</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">10+</span>
+                        <span class="stat-label">Artifacts</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            <!-- Welcome Section -->
-            <section class="welcome-section">
-                <h2>AI-Powered Enterprise Architecture Intelligence</h2>
-                <p>Generate strategic technology analysis, vendor evaluations, and market intelligence using advanced AI and real-time web research.</p>
-            </section>
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h2><i class="fas fa-rocket"></i> Welcome to Advanced EA Intelligence</h2>
+            <p>Transform your enterprise architecture decision-making with AI-powered analysis. Generate comprehensive strategic reports, vendor assessments, and technology roadmaps in minutes, not weeks.</p>
+            
+            <div class="capabilities-overview">
+                <div class="capability-item">
+                    <div class="capability-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="capability-title">Market Intelligence</div>
+                    <div class="capability-desc">Real-time market analysis and growth projections</div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon"><i class="fas fa-building"></i></div>
+                    <div class="capability-title">Vendor Assessment</div>
+                    <div class="capability-desc">Competitive positioning and selection guidance</div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon"><i class="fas fa-clock"></i></div>
+                    <div class="capability-title">Maturity Analysis</div>
+                    <div class="capability-desc">Hype cycle positioning and readiness assessment</div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon"><i class="fas fa-road"></i></div>
+                    <div class="capability-title">Strategic Forecasting</div>
+                    <div class="capability-desc">5-year roadmaps and evolution planning</div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon"><i class="fas fa-star"></i></div>
+                    <div class="capability-title">Vendor-Specific</div>
+                    <div class="capability-desc">Deep-dive technology solution analysis</div>
+                </div>
+            </div>
+        </section>
 
-            <!-- Agent Cards Grid -->
-            <section class="agents-grid">
+        <!-- Agents Section -->
+        <section class="agents-section">
+            <div class="section-header">
+                <h2><i class="fas fa-robot"></i> AI Analysis Agents</h2>
+                <p>Select an agent to begin your enterprise architecture analysis. Each agent provides specialized intelligence for strategic decision-making.</p>
+            </div>
+
+            <div class="agents-grid">
+                <!-- Technology Research Agent -->
                 <div class="agent-card priority-1" onclick="openAgent('technology-research')">
                     <div class="agent-header">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search agent-icon"></i>
                         <div class="priority-badge">Priority 1</div>
                     </div>
                     <h3>Technology Research Agent</h3>
-                    <p>Comprehensive technology analysis with market intelligence, vendor evaluation, and strategic positioning.</p>
+                    <p>Comprehensive 5-module EA analysis powered by GPT-4o with market intelligence, vendor evaluation, and vendor-specific technology assessment.</p>
                     <ul class="features">
-                        <li>Real-time market research</li>
-                        <li>Vendor landscape analysis</li>
-                        <li>Hype cycle positioning</li>
-                        <li>Strategic whitepapers</li>
+                        <li>Market trends & growth analysis</li>
+                        <li>Competitive vendor positioning</li>
+                        <li>Technology maturity assessment</li>
+                        <li>5-year strategic forecasting</li>
+                        <li>Vendor-specific technology analysis</li>
                     </ul>
                     <div class="agent-status">
                         <span class="status-ready">Ready</span>
+                        <div class="agent-metrics">~33s • 10+ artifacts</div>
                     </div>
                 </div>
 
+                <!-- Strategic Analysis Agent -->
                 <div class="agent-card priority-2" onclick="openAgent('strategic-analysis')">
                     <div class="agent-header">
-                        <i class="fas fa-chess"></i>
+                        <i class="fas fa-chess agent-icon"></i>
                         <div class="priority-badge">Priority 2</div>
                     </div>
                     <h3>Strategic Analysis Agent</h3>
-                    <p>Business-technology alignment analysis and strategic planning recommendations.</p>
+                    <p>Business-technology alignment analysis and strategic planning recommendations for enterprise initiatives.</p>
                     <ul class="features">
                         <li>Business case development</li>
                         <li>ROI analysis frameworks</li>
@@ -75,30 +563,34 @@
                     </ul>
                     <div class="agent-status">
                         <span class="status-coming-soon">Coming Soon</span>
+                        <div class="agent-metrics">Development Phase</div>
                     </div>
                 </div>
 
+                <!-- Supplier Evaluation Agent -->
                 <div class="agent-card priority-3" onclick="openAgent('supplier-evaluation')">
                     <div class="agent-header">
-                        <i class="fas fa-balance-scale"></i>
+                        <i class="fas fa-balance-scale agent-icon"></i>
                         <div class="priority-badge">Priority 3</div>
                     </div>
                     <h3>Supplier Evaluation Agent</h3>
-                    <p>4 P's framework evaluation: People, Process, Platform, Price analysis for vendor selection.</p>
+                    <p>4 P's framework evaluation: People, Process, Platform, Price analysis for comprehensive vendor selection.</p>
                     <ul class="features">
                         <li>4 P's evaluation framework</li>
-                        <li>TCO analysis</li>
-                        <li>Risk assessment</li>
+                        <li>TCO analysis and modeling</li>
+                        <li>Risk assessment scoring</li>
                         <li>Comparative scorecards</li>
                     </ul>
                     <div class="agent-status">
                         <span class="status-coming-soon">Coming Soon</span>
+                        <div class="agent-metrics">Development Phase</div>
                     </div>
                 </div>
 
+                <!-- Roadmap Planning Agent -->
                 <div class="agent-card priority-4" onclick="openAgent('roadmap-planning')">
                     <div class="agent-header">
-                        <i class="fas fa-road"></i>
+                        <i class="fas fa-road agent-icon"></i>
                         <div class="priority-badge">Priority 4</div>
                     </div>
                     <h3>Roadmap Planning Agent</h3>
@@ -111,16 +603,18 @@
                     </ul>
                     <div class="agent-status">
                         <span class="status-coming-soon">Coming Soon</span>
+                        <div class="agent-metrics">Development Phase</div>
                     </div>
                 </div>
 
+                <!-- ADR Agent -->
                 <div class="agent-card priority-5" onclick="openAgent('adr-agent')">
                     <div class="agent-header">
-                        <i class="fas fa-file-contract"></i>
+                        <i class="fas fa-file-contract agent-icon"></i>
                         <div class="priority-badge">Priority 5</div>
                     </div>
                     <h3>ADR Agent</h3>
-                    <p>Architecture Decision Record generation and documentation management.</p>
+                    <p>Architecture Decision Record generation and documentation management for enterprise architecture governance.</p>
                     <ul class="features">
                         <li>Decision documentation</li>
                         <li>Context analysis</li>
@@ -129,99 +623,99 @@
                     </ul>
                     <div class="agent-status">
                         <span class="status-coming-soon">Coming Soon</span>
+                        <div class="agent-metrics">Development Phase</div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Recent Activity -->
-            <section class="recent-activity">
-                <h3><i class="fas fa-history"></i> Recent Analysis</h3>
-                <div class="activity-list" id="activity-list">
-                    <div class="activity-item">
-                        <i class="fas fa-info-circle"></i>
-                        <span>No recent analysis. Start with the Technology Research Agent to generate your first strategic report.</span>
-                    </div>
+        <!-- Recent Activity -->
+        <section class="recent-activity">
+            <h3><i class="fas fa-history"></i> Recent Analysis</h3>
+            <div class="activity-list" id="activity-list">
+                <div class="activity-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No recent analysis. Start your first enterprise architecture assessment using the Technology Research Agent.</span>
                 </div>
-            </section>
-        </div>
-    </main>
-
-    <!-- Settings Sidebar -->
-    <div class="sidebar" id="settings-sidebar">
-        <div class="sidebar-header">
-            <h3><i class="fas fa-cog"></i> Settings</h3>
-            <button class="btn-close" onclick="closeSettings()">&times;</button>
-        </div>
-        <div class="sidebar-content">
-            <div class="setting-group">
-                <label for="claude-api-key">Claude API Key:</label>
-                <input type="password" id="claude-api-key" placeholder="sk-ant-api03-...">
-                <small>Your Anthropic Claude API key for AI analysis</small>
             </div>
-            
-            <div class="setting-group">
-                <label for="search-provider">Search Provider:</label>
-                <select id="search-provider">
-                    <option value="bing">Bing Web Search</option>
-                    <option value="serpapi">SerpApi (Google)</option>
-                    <option value="brave">Brave Search</option>
-                </select>
-                <small>Web search engine for market intelligence</small>
-            </div>
-
-            <div class="setting-group">
-                <label for="organization-name">Organization Name:</label>
-                <input type="text" id="organization-name" placeholder="Your Company Name">
-                <small>Used in generated reports and analysis</small>
-            </div>
-
-            <div class="setting-group">
-                <label for="industry-sector">Industry Sector:</label>
-                <select id="industry-sector">
-                    <option value="">Select Industry</option>
-                    <option value="financial-services">Financial Services</option>
-                    <option value="healthcare">Healthcare</option>
-                    <option value="technology">Technology</option>
-                    <option value="manufacturing">Manufacturing</option>
-                    <option value="retail">Retail</option>
-                    <option value="government">Government</option>
-                    <option value="education">Education</option>
-                    <option value="other">Other</option>
-                </select>
-                <small>Helps tailor analysis to your industry context</small>
-            </div>
-
-            <div class="setting-actions">
-                <button class="btn-primary settings-btn" onclick="saveSettings()">
-                    <i class="fas fa-save"></i> Save Settings
-                </button>
-                <button class="btn-secondary settings-btn" onclick="testConnection()">
-                    <i class="fas fa-wifi"></i> Test Connection
-                </button>
-            </div>
-        </div>
+        </section>
     </div>
 
-    <!-- Agent Modal -->
-    <div class="modal" id="agent-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Agent Interface</h3>
-                <button class="btn-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                <!-- Agent interfaces will be loaded here -->
-            </div>
-        </div>
+    <!-- Modal -->
+    <div id="agent-modal" class="modal">
+        <!-- Modal content will be populated by agent interfaces -->
     </div>
-
-    <!-- Overlay -->
-    <div class="overlay" id="overlay" onclick="closeModal()"></div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/agents/technology-research.js"></script>
-    <script src="js/agents/research-interface.js"></script>
+    <script src="js/agents/technology-research-interface.js"></script>
+
+    <script>
+        // Global functions
+        function openAgent(agentType) {
+            const modal = document.getElementById('agent-modal');
+            
+            switch(agentType) {
+                case 'technology-research':
+                    if (window.researchInterface) {
+                        window.researchInterface.initializeInterface();
+                        modal.style.display = 'block';
+                    }
+                    break;
+                case 'strategic-analysis':
+                case 'supplier-evaluation':
+                case 'roadmap-planning':
+                case 'adr-agent':
+                    showComingSoon(agentType);
+                    break;
+                default:
+                    console.log('Unknown agent type:', agentType);
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('agent-modal');
+            modal.style.display = 'none';
+        }
+
+        function showComingSoon(agentType) {
+            const modal = document.getElementById('agent-modal');
+            const agentNames = {
+                'strategic-analysis': 'Strategic Analysis Agent',
+                'supplier-evaluation': 'Supplier Evaluation Agent',
+                'roadmap-planning': 'Roadmap Planning Agent',
+                'adr-agent': 'ADR Agent'
+            };
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-clock"></i> ${agentNames[agentType]}</h2>
+                        <span class="close" onclick="closeModal()">&times;</span>
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <i class="fas fa-cog fa-spin" style="font-size: 3rem; color: #3498db; margin-bottom: 20px;"></i>
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">Coming Soon</h3>
+                        <p style="color: #7f8c8d; line-height: 1.6;">This agent is currently in development. The Technology Research Agent is ready for immediate use with comprehensive 5-module analysis capabilities.</p>
+                        <button onclick="openAgent('technology-research')" style="background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; margin-top: 20px;">
+                            Try Technology Research Agent
+                        </button>
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('agent-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        console.log('Enterprise Architecture AI Agents Dashboard v2.0 initialized');
+    </script>
 </body>
 </html>
