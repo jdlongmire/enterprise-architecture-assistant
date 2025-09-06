@@ -1,6 +1,6 @@
 // netlify/functions/supplier-quad.js
 // Enterprise Architecture Supplier Quadrant Analysis Module
-// Magic Quadrant-style vendor positioning with weighted scoring
+// Real-world data extraction only - no synthetic data generation
 
 const fetch = require('node-fetch');
 
@@ -45,7 +45,7 @@ exports.handler = async (event, context) => {
         const supplierQuadPrompt = `Conduct a Magic Quadrant-style vendor positioning analysis for ${technology}.
 
 **ANALYSIS FRAMEWORK:**
-Evaluate 8-12 major vendors using Gartner-style methodology with transparent scoring:
+Evaluate 6-10 major vendors using Gartner-style methodology with transparent scoring:
 
 **ABILITY TO EXECUTE (Weighted Scoring)**
 - Product Capability (25%): Feature breadth/depth, performance benchmarks, compliance certifications
@@ -63,26 +63,30 @@ Evaluate 8-12 major vendors using Gartner-style methodology with transparent sco
 - Standards Compliance (10%): Open standards support, API portability, interoperability
 - Geographic Strategy (10%): Global presence, localization, data residency compliance
 
-**VENDOR EVALUATION:**
-For each vendor provide:
-1. Company name and primary products
-2. Scores (0-100) for each sub-factor with brief rationale
-3. Computed axis scores (weighted average)
-4. Quadrant assignment (Leaders/Challengers/Visionaries/Niche Players)
-5. Key strengths and strategic positioning
+**REQUIRED OUTPUT FORMAT:**
+For each vendor, provide EXACTLY this structure:
 
-**QUADRANT LOGIC:**
-- Leaders: High execution + High vision (>70 both axes)
-- Challengers: High execution + Moderate vision (>70 execute, 50-70 vision)
-- Visionaries: Moderate execution + High vision (50-70 execute, >70 vision)  
-- Niche Players: Moderate execution + Moderate vision (<70 both axes)
+**Vendor 1: [Company Name]**
+1. **Scores:**
+   - Product Capability: [0-100] ([brief rationale])
+   - Reliability & Operations: [0-100] ([brief rationale])
+   - Customer Experience: [0-100] ([brief rationale])
+   - Market Traction: [0-100] ([brief rationale])
+   - Financial Viability: [0-100] ([brief rationale])
+   - Ecosystem Partners: [0-100] ([brief rationale])
+   - Innovation Roadmap: [0-100] ([brief rationale])
+   - Market Understanding: [0-100] ([brief rationale])
+   - Platform Strategy: [0-100] ([brief rationale])
+   - Go-to-Market: [0-100] ([brief rationale])
+   - Standards Compliance: [0-100] ([brief rationale])
+   - Geographic Strategy: [0-100] ([brief rationale])
+2. **Axis Scores:**
+   - Ability to Execute: [weighted average]
+   - Completeness of Vision: [weighted average]
+3. **Quadrant Assignment:** [Leaders/Challengers/Visionaries/Niche Players]
+4. **Key Strengths:** [2-3 key differentiators]
 
-**OUTPUT FORMAT:**
-Structure as vendor-by-vendor analysis with clear scoring rationale and strategic insights.
-
-Provide actionable vendor selection guidance for enterprise architects.
-
-Keep response comprehensive but under 400 words total.`;
+Use only real, publicly verifiable companies and accurate market data.`;
 
         // Call GPT-4o API
         const apiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -99,8 +103,8 @@ Keep response comprehensive but under 400 words total.`;
                         content: supplierQuadPrompt
                     }
                 ],
-                max_tokens: 1000,
-                temperature: 0.3
+                max_tokens: 1500,
+                temperature: 0.1
             }),
         });
 
@@ -116,14 +120,18 @@ Keep response comprehensive but under 400 words total.`;
 
         console.log(`Supplier quadrant analysis completed in ${executionTime}ms`);
 
-        // Extract vendor data and scores from analysis
-        const vendorData = extractVendorScores(analysisText);
+        // Extract vendor data from real GPT analysis only
+        const vendorData = extractRealVendorData(analysisText);
+        
+        if (vendorData.length === 0) {
+            throw new Error('Unable to extract vendor data from analysis. GPT response may not match expected format.');
+        }
         
         // Generate chart data for Magic Quadrant visualization
         const chartData = generateQuadrantChartData(vendorData);
         
         // Extract key metrics
-        const metrics = extractQuadrantMetrics(analysisText);
+        const metrics = extractQuadrantMetrics(vendorData);
         
         // Format for web summary
         const webSummary = formatQuadrantSummary(analysisText, vendorData);
@@ -144,7 +152,7 @@ Keep response comprehensive but under 400 words total.`;
                         technology: technology,
                         executionTime: executionTime,
                         timestamp: new Date().toISOString(),
-                        methodology: 'Magic Quadrant-style weighted scoring'
+                        methodology: 'Magic Quadrant-style weighted scoring - real data only'
                     }
                 }
             })
@@ -165,170 +173,116 @@ Keep response comprehensive but under 400 words total.`;
     }
 };
 
-// Extract vendor scores and positioning from analysis text
-function extractVendorScores(analysisText) {
+// Extract real vendor data from GPT analysis - no synthetic data
+function extractRealVendorData(analysisText) {
     const vendors = [];
     
-    console.log('Raw analysis text:', analysisText.substring(0, 500) + '...');
+    console.log('Extracting real vendor data from GPT analysis...');
     
-    // Try multiple parsing approaches
-    let vendorSections = [];
-    
-    // Approach 1: Look for **VendorName** patterns
-    const boldVendorMatches = analysisText.match(/\*\*([A-Za-z\s&\.]+)\*\*/g);
-    if (boldVendorMatches && boldVendorMatches.length > 0) {
-        console.log('Found bold vendor matches:', boldVendorMatches);
-        vendorSections = analysisText.split(/(?=\*\*[A-Za-z\s&\.]+\*\*)/);
-    } else {
-        // Approach 2: Look for numbered lists
-        vendorSections = analysisText.split(/(?=\d+\.\s+[A-Za-z])/);
-    }
-    
-    // If still no sections, create fallback vendors based on common patterns
-    if (vendorSections.length < 2) {
-        console.log('Using fallback vendor extraction');
-        return createFallbackVendors(analysisText);
-    }
+    // Split by vendor sections
+    const vendorSections = analysisText.split(/(?=\*\*Vendor\s+\d+:)/);
     
     vendorSections.forEach((section, index) => {
-        if (index === 0 && section.length < 50) return; // Skip header section
+        if (section.trim().length < 100) return; // Skip short sections
         
-        let vendorName = '';
-        
-        // Extract vendor name from various patterns
-        const patterns = [
-            /\*\*([A-Za-z\s&\.]+)\*\*/,
-            /^\d+\.\s+([A-Za-z\s&\.]+)/,
-            /^([A-Za-z\s&\.]+):/,
-            /([A-Za-z\s&\.]+)\s*-/
-        ];
-        
-        for (const pattern of patterns) {
-            const match = section.match(pattern);
-            if (match && match[1]) {
-                vendorName = match[1].trim();
-                break;
+        try {
+            const vendor = parseVendorSection(section);
+            if (vendor) {
+                vendors.push(vendor);
+                console.log(`Extracted vendor: ${vendor.name} - ${vendor.quadrant}`);
             }
-        }
-        
-        if (vendorName && vendorName.length > 2 && vendorName.length < 50) {
-            // Extract quadrant assignment
-            const quadrant = extractQuadrantFromText(section);
-            
-            // Generate representative scores
-            const scores = generateVendorScores(section, quadrant);
-            
-            vendors.push({
-                name: vendorName,
-                quadrant: quadrant,
-                abilityToExecute: scores.execute,
-                completenessOfVision: scores.vision,
-                scores: scores.detailed,
-                summary: section.substring(0, 200).trim() + '...'
-            });
-            
-            console.log(`Extracted vendor: ${vendorName} - ${quadrant}`);
+        } catch (error) {
+            console.warn(`Failed to parse vendor section ${index}:`, error.message);
         }
     });
     
-    // Ensure we have at least some vendors
-    if (vendors.length === 0) {
-        console.log('No vendors extracted, using default set');
-        return createFallbackVendors(analysisText);
+    return vendors;
+}
+
+// Parse individual vendor section for real data
+function parseVendorSection(section) {
+    // Extract vendor name
+    const nameMatch = section.match(/\*\*Vendor\s+\d+:\s+([^*\n]+)\*\*/);
+    if (!nameMatch) return null;
+    
+    const vendorName = nameMatch[1].trim().replace(/\s*\([^)]*\)$/, ''); // Remove parenthetical
+    
+    // Extract scores
+    const scores = {};
+    const scorePatterns = {
+        productCapability: /Product Capability:\s*(\d+)/,
+        reliabilityAndOps: /Reliability & Operations:\s*(\d+)/,
+        customerExperience: /Customer Experience:\s*(\d+)/,
+        marketTraction: /Market Traction:\s*(\d+)/,
+        financialViability: /Financial Viability:\s*(\d+)/,
+        ecosystemPartners: /Ecosystem Partners:\s*(\d+)/,
+        innovationRoadmap: /Innovation Roadmap:\s*(\d+)/,
+        marketUnderstanding: /Market Understanding:\s*(\d+)/,
+        platformStrategy: /Platform Strategy:\s*(\d+)/,
+        goToMarket: /Go-to-Market:\s*(\d+)/,
+        standardsCompliance: /Standards Compliance:\s*(\d+)/,
+        geographicStrategy: /Geographic Strategy:\s*(\d+)/
+    };
+    
+    let validScoreCount = 0;
+    for (const [key, pattern] of Object.entries(scorePatterns)) {
+        const match = section.match(pattern);
+        if (match) {
+            scores[key] = parseInt(match[1]);
+            validScoreCount++;
+        }
     }
     
-    console.log(`Successfully extracted ${vendors.length} vendors`);
-    return vendors.slice(0, 12); // Limit to 12 vendors max
-}
-
-// Create fallback vendors if extraction fails
-function createFallbackVendors(analysisText) {
-    const technology = analysisText.includes('Zero Trust') ? 'Zero Trust' : 
-                      analysisText.includes('AIOps') ? 'AIOps' : 'Technology';
+    // Require at least 8 valid scores for data quality
+    if (validScoreCount < 8) {
+        console.warn(`Vendor ${vendorName} has insufficient scores (${validScoreCount}/12)`);
+        return null;
+    }
     
-    const commonVendors = {
-        'Zero Trust': [
-            { name: 'Zscaler', quadrant: 'Leaders' },
-            { name: 'Palo Alto Networks', quadrant: 'Leaders' },
-            { name: 'CrowdStrike', quadrant: 'Leaders' },
-            { name: 'Microsoft', quadrant: 'Challengers' },
-            { name: 'Cisco', quadrant: 'Challengers' },
-            { name: 'Okta', quadrant: 'Visionaries' },
-            { name: 'SentinelOne', quadrant: 'Visionaries' },
-            { name: 'Fortinet', quadrant: 'Niche Players' }
-        ],
-        'AIOps': [
-            { name: 'Splunk', quadrant: 'Leaders' },
-            { name: 'Datadog', quadrant: 'Leaders' },
-            { name: 'New Relic', quadrant: 'Challengers' },
-            { name: 'Dynatrace', quadrant: 'Leaders' },
-            { name: 'AppDynamics', quadrant: 'Challengers' },
-            { name: 'Moogsoft', quadrant: 'Visionaries' },
-            { name: 'BigPanda', quadrant: 'Niche Players' }
-        ],
-        'Technology': [
-            { name: 'Vendor A', quadrant: 'Leaders' },
-            { name: 'Vendor B', quadrant: 'Challengers' },
-            { name: 'Vendor C', quadrant: 'Visionaries' },
-            { name: 'Vendor D', quadrant: 'Niche Players' }
-        ]
-    };
+    // Extract axis scores
+    const executeMatch = section.match(/Ability to Execute:\s*(\d+(?:\.\d+)?)/);
+    const visionMatch = section.match(/Completeness of Vision:\s*(\d+(?:\.\d+)?)/);
     
-    const vendorSet = commonVendors[technology] || commonVendors['Technology'];
+    if (!executeMatch || !visionMatch) {
+        console.warn(`Vendor ${vendorName} missing axis scores`);
+        return null;
+    }
     
-    return vendorSet.map(vendor => {
-        const scores = generateVendorScores('', vendor.quadrant);
-        return {
-            name: vendor.name,
-            quadrant: vendor.quadrant,
-            abilityToExecute: scores.execute,
-            completenessOfVision: scores.vision,
-            scores: scores.detailed,
-            summary: `${vendor.name} analysis based on market positioning and capabilities.`
-        };
-    });
-}
-
-// Extract quadrant assignment from vendor text
-function extractQuadrantFromText(text) {
-    if (text.toLowerCase().includes('leader')) return 'Leaders';
-    if (text.toLowerCase().includes('challenger')) return 'Challengers';
-    if (text.toLowerCase().includes('visionary')) return 'Visionaries';
-    return 'Niche Players';
-}
-
-// Generate vendor scores based on analysis content and quadrant
-function generateVendorScores(text, quadrant) {
-    const baseScores = {
-        'Leaders': { execute: 80, vision: 80 },
-        'Challengers': { execute: 75, vision: 60 },
-        'Visionaries': { execute: 60, vision: 75 },
-        'Niche Players': { execute: 55, vision: 55 }
-    };
+    const abilityToExecute = parseFloat(executeMatch[1]);
+    const completenessOfVision = parseFloat(visionMatch[1]);
     
-    const base = baseScores[quadrant] || { execute: 60, vision: 60 };
+    // Extract quadrant assignment
+    const quadrantMatch = section.match(/Quadrant Assignment:\s*([A-Za-z\s]+)/);
+    if (!quadrantMatch) {
+        console.warn(`Vendor ${vendorName} missing quadrant assignment`);
+        return null;
+    }
     
-    // Add some variance based on text content analysis
-    const variance = Math.random() * 20 - 10; // ±10 points
+    const quadrant = normalizeQuadrantName(quadrantMatch[1].trim());
+    
+    // Extract key strengths
+    const strengthsMatch = section.match(/Key Strengths:\s*([^\n]*)/);
+    const strengths = strengthsMatch ? strengthsMatch[1].trim() : '';
     
     return {
-        execute: Math.max(30, Math.min(95, base.execute + variance)),
-        vision: Math.max(30, Math.min(95, base.vision + variance)),
-        detailed: {
-            productCapability: Math.max(40, Math.min(90, base.execute + variance)),
-            reliabilityAndOps: Math.max(40, Math.min(90, base.execute + variance - 5)),
-            customerExperience: Math.max(40, Math.min(90, base.execute + variance + 5)),
-            marketTraction: Math.max(40, Math.min(90, base.execute + variance)),
-            financialViability: Math.max(40, Math.min(90, base.execute + variance + 10)),
-            ecosystemPartners: Math.max(40, Math.min(90, base.execute + variance - 5)),
-            innovationRoadmap: Math.max(40, Math.min(90, base.vision + variance)),
-            marketUnderstanding: Math.max(40, Math.min(90, base.vision + variance + 5)),
-            platformStrategy: Math.max(40, Math.min(90, base.vision + variance)),
-            goToMarket: Math.max(40, Math.min(90, base.vision + variance - 5)),
-            standardsCompliance: Math.max(40, Math.min(90, base.vision + variance - 10)),
-            geographicStrategy: Math.max(40, Math.min(90, base.vision + variance))
-        }
+        name: vendorName,
+        quadrant: quadrant,
+        abilityToExecute: abilityToExecute,
+        completenessOfVision: completenessOfVision,
+        scores: scores,
+        strengths: strengths,
+        summary: `${vendorName}: ${strengths}`
     };
+}
+
+// Normalize quadrant names to standard format
+function normalizeQuadrantName(quadrant) {
+    const normalized = quadrant.toLowerCase().trim();
+    if (normalized.includes('leader')) return 'Leaders';
+    if (normalized.includes('challenger')) return 'Challengers';
+    if (normalized.includes('visionar')) return 'Visionaries';
+    if (normalized.includes('niche')) return 'Niche Players';
+    return 'Niche Players'; // Default fallback
 }
 
 // Generate chart data for Magic Quadrant visualization
@@ -377,21 +331,19 @@ function generateQuadrantChartData(vendors) {
             }
         },
         quadrantLines: {
-            vertical: 50,   // Vision threshold
-            horizontal: 50  // Execution threshold
+            vertical: 50,
+            horizontal: 50
         }
     };
 }
 
-// Extract key metrics from supplier analysis
-function extractQuadrantMetrics(analysisText) {
-    const vendorCount = (analysisText.match(/\*\*[A-Za-z\s&]+\*\*/g) || []).length;
-    
+// Extract key metrics from real vendor data
+function extractQuadrantMetrics(vendors) {
     return {
-        totalVendors: vendorCount,
+        totalVendors: vendors.length,
         evaluationFramework: '12-factor weighted scoring',
         methodology: 'Magic Quadrant-style positioning',
-        scoringBasis: 'Evidence-based with transparent criteria'
+        scoringBasis: 'Real market analysis - no synthetic data'
     };
 }
 
