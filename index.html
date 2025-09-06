@@ -6,6 +6,7 @@
     <title>Enterprise Architecture AI Agents</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -231,6 +232,10 @@
 
         .agent-card.priority-5 {
             border-left: 4px solid #9b59b6;
+        }
+
+        .agent-card.priority-6 {
+            border-left: 4px solid #e67e22;
         }
 
         .agent-header {
@@ -469,15 +474,15 @@
                 </div>
                 <div class="header-stats">
                     <div class="stat-item">
-                        <span class="stat-number">5</span>
+                        <span class="stat-number">6</span>
                         <span class="stat-label">AI Modules</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">33s</span>
+                        <span class="stat-number">40s</span>
                         <span class="stat-label">Analysis Time</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">10+</span>
+                        <span class="stat-number">15+</span>
                         <span class="stat-label">Artifacts</span>
                     </div>
                 </div>
@@ -515,6 +520,11 @@
                     <div class="capability-title">Vendor-Specific</div>
                     <div class="capability-desc">Deep-dive technology solution analysis</div>
                 </div>
+                <div class="capability-item">
+                    <div class="capability-icon"><i class="fas fa-th-large"></i></div>
+                    <div class="capability-title">Magic Quadrant</div>
+                    <div class="capability-desc">Gartner-style vendor positioning analysis</div>
+                </div>
             </div>
         </section>
 
@@ -547,11 +557,32 @@
                     </div>
                 </div>
 
+                <!-- Supplier Quad Agent -->
+                <div class="agent-card priority-2" onclick="openAgent('supplier-quad')">
+                    <div class="agent-header">
+                        <i class="fas fa-th-large agent-icon"></i>
+                        <div class="priority-badge">Priority 2</div>
+                    </div>
+                    <h3>Supplier Quad Agent</h3>
+                    <p>Magic Quadrant-style vendor positioning analysis with Gartner methodology and 12-factor weighted scoring framework.</p>
+                    <ul class="features">
+                        <li>Gartner-style Magic Quadrant positioning</li>
+                        <li>12-factor weighted scoring system</li>
+                        <li>Leaders/Challengers/Visionaries classification</li>
+                        <li>Evidence-based vendor evaluation</li>
+                        <li>Professional quadrant chart generation</li>
+                    </ul>
+                    <div class="agent-status">
+                        <span class="status-ready">Ready</span>
+                        <div class="agent-metrics">~8s • Magic Quadrant chart</div>
+                    </div>
+                </div>
+
                 <!-- Strategic Analysis Agent -->
-                <div class="agent-card priority-2" onclick="openAgent('strategic-analysis')">
+                <div class="agent-card priority-3" onclick="openAgent('strategic-analysis')">
                     <div class="agent-header">
                         <i class="fas fa-chess agent-icon"></i>
-                        <div class="priority-badge">Priority 2</div>
+                        <div class="priority-badge">Priority 3</div>
                     </div>
                     <h3>Strategic Analysis Agent</h3>
                     <p>Business-technology alignment analysis and strategic planning recommendations for enterprise initiatives.</p>
@@ -568,10 +599,10 @@
                 </div>
 
                 <!-- Supplier Evaluation Agent -->
-                <div class="agent-card priority-3" onclick="openAgent('supplier-evaluation')">
+                <div class="agent-card priority-4" onclick="openAgent('supplier-evaluation')">
                     <div class="agent-header">
                         <i class="fas fa-balance-scale agent-icon"></i>
-                        <div class="priority-badge">Priority 3</div>
+                        <div class="priority-badge">Priority 4</div>
                     </div>
                     <h3>Supplier Evaluation Agent</h3>
                     <p>4 P's framework evaluation: People, Process, Platform, Price analysis for comprehensive vendor selection.</p>
@@ -588,10 +619,10 @@
                 </div>
 
                 <!-- Roadmap Planning Agent -->
-                <div class="agent-card priority-4" onclick="openAgent('roadmap-planning')">
+                <div class="agent-card priority-5" onclick="openAgent('roadmap-planning')">
                     <div class="agent-header">
                         <i class="fas fa-road agent-icon"></i>
-                        <div class="priority-badge">Priority 4</div>
+                        <div class="priority-badge">Priority 5</div>
                     </div>
                     <h3>Roadmap Planning Agent</h3>
                     <p>Multi-year technology roadmap development with dependency mapping and milestone planning.</p>
@@ -608,10 +639,10 @@
                 </div>
 
                 <!-- ADR Agent -->
-                <div class="agent-card priority-5" onclick="openAgent('adr-agent')">
+                <div class="agent-card priority-6" onclick="openAgent('adr-agent')">
                     <div class="agent-header">
                         <i class="fas fa-file-contract agent-icon"></i>
-                        <div class="priority-badge">Priority 5</div>
+                        <div class="priority-badge">Priority 6</div>
                     </div>
                     <h3>ADR Agent</h3>
                     <p>Architecture Decision Record generation and documentation management for enterprise architecture governance.</p>
@@ -635,7 +666,7 @@
             <div class="activity-list" id="activity-list">
                 <div class="activity-item">
                     <i class="fas fa-info-circle"></i>
-                    <span>No recent analysis. Start your first enterprise architecture assessment using the Technology Research Agent.</span>
+                    <span>No recent analysis. Start your first enterprise architecture assessment using the Technology Research Agent or Supplier Quad Agent.</span>
                 </div>
             </div>
         </section>
@@ -649,6 +680,7 @@
     <!-- Scripts -->
     <script src="js/agents/technology-research.js"></script>
     <script src="js/agents/technology-research-interface.js"></script>
+    <script src="js/agents/supplier-quad-interface.js"></script>
 
     <script>
         // Global functions
@@ -660,6 +692,14 @@
                     if (window.researchInterface) {
                         window.researchInterface.initializeInterface();
                         modal.style.display = 'block';
+                    }
+                    break;
+                case 'supplier-quad':
+                    if (window.supplierQuadInterface) {
+                        window.supplierQuadInterface.initializeInterface();
+                        modal.style.display = 'block';
+                    } else {
+                        showTemporaryInterface('supplier-quad');
                     }
                     break;
                 case 'strategic-analysis':
@@ -696,14 +736,122 @@
                     <div style="padding: 40px; text-align: center;">
                         <i class="fas fa-cog fa-spin" style="font-size: 3rem; color: #3498db; margin-bottom: 20px;"></i>
                         <h3 style="color: #2c3e50; margin-bottom: 15px;">Coming Soon</h3>
-                        <p style="color: #7f8c8d; line-height: 1.6;">This agent is currently in development. The Technology Research Agent is ready for immediate use with comprehensive 5-module analysis capabilities.</p>
-                        <button onclick="openAgent('technology-research')" style="background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; margin-top: 20px;">
-                            Try Technology Research Agent
-                        </button>
+                        <p style="color: #7f8c8d; line-height: 1.6;">This agent is currently in development. The Technology Research Agent and Supplier Quad Agent are ready for immediate use.</p>
+                        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="openAgent('technology-research')" style="background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer;">
+                                Technology Research
+                            </button>
+                            <button onclick="openAgent('supplier-quad')" style="background: linear-gradient(45deg, #27ae60, #2ecc71); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer;">
+                                Supplier Quad
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
             modal.style.display = 'block';
+        }
+
+        function showTemporaryInterface(agentType) {
+            const modal = document.getElementById('agent-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-th-large"></i> Supplier Quad Agent</h2>
+                        <span class="close" onclick="closeModal()">&times;</span>
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <i class="fas fa-th-large" style="font-size: 3rem; color: #3498db; margin-bottom: 20px;"></i>
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">Supplier Quad Interface</h3>
+                        <p style="color: #7f8c8d; line-height: 1.6; margin-bottom: 25px;">Magic Quadrant-style vendor positioning analysis. Enter a technology area to generate a Gartner-style vendor assessment.</p>
+                        <div style="max-width: 400px; margin: 0 auto;">
+                            <input type="text" id="technology-input" placeholder="Enter technology (e.g., Zero Trust Security)" style="width: 100%; padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; font-size: 1rem; margin-bottom: 20px;">
+                            <button onclick="startSupplierQuadAnalysis()" style="background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; width: 100%;">
+                                Generate Magic Quadrant Analysis
+                            </button>
+                        </div>
+                        <div id="analysis-progress" style="margin-top: 20px; display: none;">
+                            <i class="fas fa-spinner fa-spin" style="color: #3498db; margin-right: 10px;"></i>
+                            <span style="color: #7f8c8d;">Analyzing vendor positioning...</span>
+                        </div>
+                        <div id="analysis-results" style="margin-top: 20px; text-align: left; display: none;">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+
+        async function startSupplierQuadAnalysis() {
+            const technologyInput = document.getElementById('technology-input');
+            const technology = technologyInput.value.trim();
+            
+            if (!technology) {
+                alert('Please enter a technology area to analyze.');
+                return;
+            }
+
+            const progressDiv = document.getElementById('analysis-progress');
+            const resultsDiv = document.getElementById('analysis-results');
+            
+            progressDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/.netlify/functions/supplier-quad', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ technology: technology })
+                });
+
+                const result = await response.json();
+
+                progressDiv.style.display = 'none';
+
+                if (result.success) {
+                    displaySupplierQuadResults(result.data);
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px;">
+                            <strong>Analysis Failed:</strong> ${result.error}
+                        </div>
+                    `;
+                    resultsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                resultsDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px;">
+                        <strong>Error:</strong> Failed to connect to analysis service. Please try again.
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+            }
+        }
+
+        function displaySupplierQuadResults(data) {
+            const resultsDiv = document.getElementById('analysis-results');
+            
+            resultsDiv.innerHTML = `
+                <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <strong>Analysis Complete!</strong> Magic Quadrant positioning generated for ${data.metadata.technology}
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">Vendor Positioning Summary</h4>
+                    <p style="color: #7f8c8d; margin-bottom: 15px;">${data.webSummary.overview}</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        ${Object.entries(data.webSummary.quadrantDistribution).map(([quadrant, count]) => `
+                            <div style="text-align: center; background: white; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #3498db;">${count}</div>
+                                <div style="font-size: 0.9rem; color: #7f8c8d;">${quadrant}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
         }
 
         // Close modal when clicking outside
@@ -715,7 +863,8 @@
         }
 
         // Initialize
-        console.log('Enterprise Architecture AI Agents Dashboard v2.0 initialized');
+        console.log('Enterprise Architecture AI Agents Dashboard v3.0 initialized');
+        console.log('6-Module System: Technology Research + Supplier Quad Ready');
     </script>
 </body>
 </html>
